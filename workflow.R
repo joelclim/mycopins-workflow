@@ -1,4 +1,3 @@
-workflow_path <- "./workflow/"
 lib_path <- paste0(workflow_path, "lib/")
 
 # Pre-process stage
@@ -21,6 +20,16 @@ source(paste0(lib_path, "apply_match_to_counts.R"))
 # Stage 3 - Taxonomy and Traits
 source(paste0(lib_path, "get_gbif_taxon.R"))
 source(paste0(lib_path, "get_fungal_traits.R"))
+
+
+run_workflow <- function(batch_name, scata_dataset_name, scata_job_id) {
+  configuration <- mycopins_config(batch_name, scata_dataset_name, scata_job_id)
+  
+  mycopins_preprocess(configuration)
+  mycopins_search(configuration)
+  mycopins_identify(configuration)
+  mycopins_annotate(configuration)
+}
 
 
 mycopins_config <- function(batch_name, scata_dataset_name, scata_job_id) {
