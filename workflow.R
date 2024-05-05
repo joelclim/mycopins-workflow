@@ -24,9 +24,12 @@ source(paste0(lib_path, "get_fungal_traits.R"))
 
 run_workflow <- function(batch_name, scata_dataset_name, scata_job_id) {
   configuration <- mycopins_config(batch_name, scata_dataset_name, scata_job_id)
-  
+
   mycopins_preprocess(configuration)
+  
   mycopins_search(configuration)
+  readline(prompt="Press [Enter] to continue")
+  
   mycopins_identify(configuration)
   mycopins_annotate(configuration)
 }
@@ -91,28 +94,30 @@ mycopins_preprocess <- function(configuration) {
   cleaned_clusters_file = configuration["cleaned_clusters_file"]
   
   # Clean counts
-  print("Cleaning counts dataset")
+  print("[Pre-process] Clean counts dataset")
   cleaned_counts_df <- clean_counts(scata_counts_file, features_file, scata_dataset_name)
   write.csv(cleaned_counts_df, file = cleaned_counts_file, row.names = FALSE)
   
   # Clean clusters
-  print("Cleaning clusters dataset")
+  print("[Pre-process] Clean clusters dataset")
   cleaned_clusters_df <- clean_clusters(scata_clusters_file, cleaned_clusters_file)
   
-  print("Pre-process stage complete!")
+  print("[Pre-process] Complete!")
 }
 
 
 mycopins_search <- function(configuration) {
   blast_directory = configuration["blast_directory"]
   cleaned_clusters_file = configuration["cleaned_clusters_file"]
-  cleaned_clusters_df <- read_csv(cleaned_clusters_file)
+  cleaned_clusters_df <- read_csv(cleaned_clusters_file, show_col_types = FALSE)
   
   # Blast cluster sequences
-  print("Creating FASTA files")
+  print("[Search] Create FASTA files")
   batch_cluster_sequences(cleaned_clusters_df, blast_directory)
   
-  print("FASTA files created. Upload them to BLAST and download search results in JSON format.")
+  print(paste("[Search] FASTA files created.",
+    "Upload the FASTA files to BLAST.",
+    "Then, download search results in JSON format."))
 }
 
 
@@ -123,50 +128,49 @@ mycopins_identify <- function(configuration) {
   top_match_file = configuration["top_match_file"]
   
   # Consolidate BLAST results
-  print("Consolidating BLAST results")
+  print("[Identify] Consolidate BLAST results")
   consolidated_blast_df <- consolidate_blast_results(blast_directory, scata_job_id)
   write.csv(consolidated_blast_df, file = consolidated_blast_file, row.names = FALSE)
-  print("BLAST results consolidated")
   
   # Top BLAST results by cluster
-  print("Determining top match per cluster")
+  print("[Identify] Determine top match per cluster")
   top_match_df <- top_blast_results_by_cluster(consolidated_blast_df)
   write.csv(top_match_df, file = top_match_file, row.names = FALSE)
   
-  print("Identify stage complete!")
+  print("[Identify] Complete!")
 }
 
 
 mycopins_annotate <- function(configuration) {
   top_match_file = configuration["top_match_file"]
-  top_match_df <- read_csv(top_match_file)
+  top_match_df <- read_csv(top_match_file, show_col_types = FALSE)
 
   cleaned_clusters_file = configuration["cleaned_clusters_file"]
-  cleaned_clusters_df <- read_csv(cleaned_clusters_file)
+  cleaned_clusters_df <- read_csv(cleaned_clusters_file, show_col_types = FALSE)
 
   cleaned_counts_file = configuration["cleaned_counts_file"]
-  cleaned_counts_df <- read_csv(cleaned_counts_file)
+  cleaned_counts_df <- read_csv(cleaned_counts_file, show_col_types = FALSE)
   
   complete_clusters_file = configuration["complete_clusters_file"]
   complete_counts_file = configuration["complete_counts_file"]
   
   # Apply top match to clusters
-  print("Applying top match species to clusters")
+  print("[Annotate] Apply top match species to clusters")
   complete_clusters_df <- apply_top_match_to_clusters(top_match_df, cleaned_clusters_df)
   write.csv(complete_clusters_df, file = complete_clusters_file, row.names = FALSE)
   
   # Apply match to counts
-  print("Applying top match species to counts")
+  print("[Annotate] Apply top match species to counts")
   complete_counts_df <- apply_match_to_counts(cleaned_counts_df, complete_clusters_df)
   write.csv(complete_counts_df, file = complete_counts_file, row.names = FALSE)
   
-  print("Annotate stage complete!")
+  print("[Annotate] Complete!")
 }
 
 
 mycopins_gbif_taxonomy <- function(configuration) {
   complete_clusters_file = configuration["complete_clusters_file"]
-  complete_clusters_df <- read_csv(complete_clusters_file)
+  complete_clusters_df <- read_csv(complete_clusters_file, show_col_types = FALSE)
 
   gbif_taxon_file <- configuration["gbif_taxon_file"]
     
@@ -185,11 +189,11 @@ mycopins_gbif_taxonomy <- function(configuration) {
 mycopins_fungal_traits <- function(configuration) {
   gbif_taxon_file <- configuration["gbif_taxon_file"]
   print(paste("Loading GBIF taxonomy", gbif_taxon_file))
-  gbif_taxon_df <- read_csv(gbif_taxon_file)
+  gbif_taxon_df <- read_csv(gbif_taxon_file, show_col_types = FALSE)
   
   fungal_traits_file <- configuration["fungal_traits_file"]
   print(paste("Loading fungal traits", fungal_traits_file))
-  fungal_traits_df <- read_csv(fungal_traits_file)
+  fungal_traits_df <- read_csv(fungal_traits_file, show_col_types = FALSE)
 
   genus_traits_file <- configuration["genus_traits_file"]
     

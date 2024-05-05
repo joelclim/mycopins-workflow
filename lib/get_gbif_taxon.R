@@ -1,3 +1,5 @@
+if (!require("rgbif")) install.packages("rgbif")
+
 library("rgbif")
 
 get_gbif_taxon <- function(organisms) {
@@ -23,13 +25,13 @@ get_gbif_taxon <- function(organisms) {
       ))
     }
     return(c(
-      matchType = ifelse("matchType" %in% names(taxon), 
+      matchType = ifelse("matchType" %in% names(taxon),
                          taxon$matchType, ""),
-      scientificName = ifelse("scientificName" %in% names(taxon), 
+      scientificName = ifelse("scientificName" %in% names(taxon),
                               taxon$scientificName, ""),
-      acceptedNameUsage = ifelse("species" %in% names(taxon), 
+      acceptedNameUsage = ifelse("species" %in% names(taxon),
                                  taxon$species, ""),
-      originalNameUsage = ifelse("canonicalName" %in% names(taxon), 
+      originalNameUsage = ifelse("canonicalName" %in% names(taxon),
                                  taxon$canonicalName, ""),
       kingdom = ifelse("kingdom" %in% names(taxon), taxon$kingdom, ""),
       phylum = ifelse("phylum" %in% names(taxon), taxon$phylum, ""),
@@ -40,10 +42,10 @@ get_gbif_taxon <- function(organisms) {
       taxonKey = ifelse("rank" %in% names(taxon), taxon$rank, ""),
       status = ifelse("status" %in% names(taxon), taxon$status, ""),
       scientificNameAuthorship = ifelse(
-        "scientificName" %in% names(taxon) & 
-        "canonicalName" %in% names(taxon), 
+        "scientificName" %in% names(taxon) &
+        "canonicalName" %in% names(taxon),
         trimws(substring(
-          taxon$scientificName, 
+          taxon$scientificName,
           nchar(taxon$canonicalName)+1,
           nchar(taxon$scientificName))), "")
     ))
@@ -82,7 +84,7 @@ get_gbif_taxon <- function(organisms) {
     status[i] <- taxon['status']
     scientificNameAuthorship[i] <- taxon['scientificNameAuthorship']
   }
-  
+
   organism_gbif_df$matchType <- matchType
   organism_gbif_df$scientificName <- scientificName
   organism_gbif_df$acceptedNameUsage <- acceptedNameUsage
@@ -96,6 +98,6 @@ get_gbif_taxon <- function(organisms) {
   organism_gbif_df$taxonKey <- taxonKey
   organism_gbif_df$status <- status
   organism_gbif_df$scientificNameAuthorship <- scientificNameAuthorship
-  
+
   return(organism_gbif_df)
 }
