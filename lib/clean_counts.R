@@ -104,6 +104,11 @@ clean_counts <- function(in_counts_file,
   # Remove the positive and negative control value rows
   clean_df <- clean_df[clean_df$Sample.Number != "POS", ]
   clean_df <- clean_df[clean_df$Sample.Number != "NEG", ]
+  
+  # Remove rows whose sum of counts is zero
+  start_col <- which(names(clean_df) == sep_col_name)
+  num_counts_df <- clean_df[, (start_col+1):ncol(clean_df)]
+  clean_df <- clean_df[rowSums(num_counts_df) != 0, ]
 
   return(clean_df)
 }

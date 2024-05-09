@@ -18,8 +18,8 @@ get_wood_saprotrophs_traits <- function(traits_df) {
   wood_saprotroph_genera <- sort(unique(c(wood_saprotroph_genera,
                                           secondary_traits_df$GENUS)))
 
-  wood_saprotroph_genus_traits_df <- rbind(primary_traits_df,
-                                           secondary_traits_df)
+  wood_saprotrophs_traits_df <- rbind(primary_traits_df,
+                                      secondary_traits_df)
 
-  return(wood_saprotroph_genus_traits_df)
+  return(wood_saprotrophs_traits_df)
 }

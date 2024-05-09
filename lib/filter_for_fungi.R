@@ -1,21 +1,25 @@
 filter_for_fungi <- function(counts_df,
                              gbif_taxon_df,
                              sep_col_name = "_Splitter_") {
-  fungi_df <- gbif_taxon_df[nchar(gbif_taxon_df$phylum) > 0,]
+  fungi_taxon_df <- gbif_taxon_df[nchar(gbif_taxon_df$genus) > 0,]
 
   start_col <- which(names(counts_df) == sep_col_name)
 
   features <- names(counts_df[, 1:start_col])
 
   # For each record, get the value in acceptedNameUsage if exists.
-  # Otherwise, get the value in organism (normalize name).
-  fungi <- unique(sort(ifelse(nchar(fungi_df$acceptedNameUsage) > 0,
-                              fungi_df$acceptedNameUsage,
-                              fungi_df$originalNameUsage)))
+  # Otherwise, use the originalNameUsage.
+  fungi_names <- unique(sort(ifelse(!is.na(fungi_taxon_df$acceptedNameUsage),
+                                    fungi_taxon_df$acceptedNameUsage,
+                                    fungi_taxon_df$originalNameUsage)))
 
-  # fungus in ('uncultured fungi', 'fungal sp.')
-  filtered_counts_df <- counts_df[names(counts_df)
-                                  %in% c(features, fungi, "fungus")]
+  # Exclude: "fungus" in ('uncultured fungi', 'fungal sp.')
+  fungi_only_df <- counts_df[names(counts_df) %in% c(features, fungi_names)]
+  fungi_only_df <- fungi_only_df[names(fungi_only_df) != "Fungus"]
+  
+  # Remove rows whose sum of counts is zero
+  num_counts_df <- fungi_only_df[, (start_col+1):ncol(fungi_only_df)]
+  fungi_only_df <- fungi_only_df[rowSums(num_counts_df) != 0, ]
 
-  return(filtered_counts_df)
+  return(fungi_only_df)
 }

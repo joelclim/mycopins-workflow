@@ -2,30 +2,27 @@ library(readr)
 library(vegan)
 library(viridis)
 
-working_folder_path <- "C:/Users/Joel/work/kean-stme-2903-11/mycopins/shiny-apps/mycopins/"
-data_file <- c(
-  paste0(working_folder_path, "data/FA23_complete_counts.csv"),
-  paste0(working_folder_path, "data/SP24_complete_counts.csv"),
-  paste0(working_folder_path, "data/transectC_complete_counts.csv"),
-  paste0(working_folder_path, "data/FA23_complete_counts_fungi.csv"),
-  paste0(working_folder_path, "data/SP24_complete_counts_fungi.csv"),
-  paste0(working_folder_path, "data/transectC_counts_fungi.csv"),
-  paste0(working_folder_path, "data/FA23_complete_counts_wood_saprotroph.csv"),
-  paste0(working_folder_path, "data/SP24_complete_counts_wood_saprotroph.csv"),
-  paste0(working_folder_path, "data/transectC_counts_wood_saprotroph.csv")
-)
+working_folder_path <- "C:/Users/Joel/work/kean-stme-2903-11/github.com/joelclim/data"
 
-get_counts_data <- function(team, species) {
-  index <- as.numeric(team) + (as.numeric(species) - 1) * 3
+get_counts_data <- function(batch, species) {
+  if (1 == species) {
+    counts_file <- paste0("./data/", batch, "/complete_counts.csv")
+  } else if (2 == species) {        # genus/species
+    counts_file <- paste0("./data/", batch, "/complete_counts_fungi_only.csv")
+  } else if (3 == species) { # wood saprotrophs fungi
+    counts_file <- paste0("./data/", batch, "/complete_counts_wood_saprotrophs_only.csv")
+  }
   
-  return(read_csv(data_file[index]))
+  counts_df <- read_csv(counts_file)
+  
+  return(counts_df)
 }
 
 method <- "bray"
-group <- 2 # FA23 + SP24
+batch <- "SP24-transectC-1"
 species <- 1 # All species
 
-df <- get_counts_data(group, species)
+df <- get_counts_data(batch, species)
 discriminator_index <- which(names(df) == "_Splitter_")
 wood <- df[, (discriminator_index+1):ncol(df)]
 wood.env <- df[, 1:(discriminator_index-1)]
@@ -36,10 +33,10 @@ wood.mds <- metaMDS(wood, try=1000, distance = method, k = 2)
 ###############################################################################
 # Ordination Plot
 type <- "none" # none, points, text
-groups <- wood.env$Wood.Texture
-colors <- viridis(length(unique(groups)))
+features <- wood.env$Wood.Texture
+colors <- viridis(length(unique(features)))
 ordiplot(wood.mds, type=type)
-ordiellipse(wood.mds, groups=groups, draw="polygon", col=colors, label=TRUE)
+ordiellipse(wood.mds, groups=features, draw="polygon", col=colors, label=TRUE)
 #orditorp(wood.mds, display="sites", cex=0.78, air=0.01)
 #orditorp(wood.mds, display="species", cex=0.50, col="red", air=0.01)
 
@@ -51,6 +48,7 @@ plot(env_vectors, cex=0.80, add=TRUE)
 ###############################################################################
 # Analysis of Similarities
 wood.ano <- with(wood.env, anosim(wood.dist, Wood.Texture))
+wood.ano <- with(wood.env, anosim(wood.dist, wood.env[["Days.Elapsed"]]))
 wood.ano
 
 ###############################################################################
