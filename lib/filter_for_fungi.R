@@ -5,7 +5,7 @@ filter_for_fungi <- function(counts_df,
 
   start_col <- which(names(counts_df) == sep_col_name)
 
-  features <- names(counts_df[, 1:start_col])
+  wood.env <- names(counts_df[, 1:start_col])
 
   # For each record, get the value in acceptedNameUsage if exists.
   # Otherwise, use the originalNameUsage.
@@ -14,9 +14,9 @@ filter_for_fungi <- function(counts_df,
                                     fungi_taxon_df$originalNameUsage)))
 
   # Exclude: "fungus" in ('uncultured fungi', 'fungal sp.')
-  fungi_only_df <- counts_df[names(counts_df) %in% c(features, fungi_names)]
+  fungi_only_df <- counts_df[names(counts_df) %in% c(wood.env, fungi_names)]
   fungi_only_df <- fungi_only_df[names(fungi_only_df) != "Fungus"]
-  
+
   # Remove rows whose sum of counts is zero
   num_counts_df <- fungi_only_df[, (start_col+1):ncol(fungi_only_df)]
   fungi_only_df <- fungi_only_df[rowSums(num_counts_df) != 0, ]

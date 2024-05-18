@@ -48,8 +48,8 @@ mycopins_config <- function(batch_name, scata_dataset_name, scata_job_id) {
   data_directory <- "./data/"
   batch_directory <- paste0(data_directory, batch_name, "/")
 
-  features_file_name <- paste0(batch_name, "-features.csv")
-  features_file <- paste0(batch_directory, features_file_name)
+  env_file_name <- paste0(batch_name, "-env.csv")
+  env_file <- paste0(batch_directory, env_file_name)
 
   scata_directory <- paste0(batch_directory, "scata/")
   scata_job_directory <- paste0(scata_directory, scata_job_id, "/")
@@ -73,12 +73,13 @@ mycopins_config <- function(batch_name, scata_dataset_name, scata_job_id) {
     batch_directory, "complete_counts_wood_saprotrophs_only.csv")
 
   return (c(
+    data_directory = data_directory,
     batch_directory = batch_directory,
     scata_dataset_name = scata_dataset_name,
     scata_job_id = scata_job_id,
     scata_counts_file = scata_counts_file,
     scata_clusters_file = scata_clusters_file,
-    features_file = features_file,
+    env_file = env_file,
     cleaned_counts_file = cleaned_counts_file,
     cleaned_clusters_file = cleaned_clusters_file,
     blast_directory = blast_directory,
@@ -98,7 +99,7 @@ mycopins_config <- function(batch_name, scata_dataset_name, scata_job_id) {
 mycopins_preprocess <- function(configuration) {
   batch_directory = configuration["batch_directory"]
   scata_dataset_name = configuration["scata_dataset_name"]
-  features_file = configuration["features_file"]
+  env_file = configuration["env_file"]
   scata_counts_file = configuration["scata_counts_file"]
   scata_clusters_file = configuration["scata_clusters_file"]
   cleaned_counts_file = configuration["cleaned_counts_file"]
@@ -106,7 +107,7 @@ mycopins_preprocess <- function(configuration) {
 
   # Clean counts
   print("[Pre-process] Clean counts dataset")
-  cleaned_counts_df <- clean_counts(scata_counts_file, features_file, scata_dataset_name)
+  cleaned_counts_df <- clean_counts(scata_counts_file, env_file, scata_dataset_name)
   write.csv(cleaned_counts_df, file = cleaned_counts_file, row.names = FALSE)
 
   # Clean clusters

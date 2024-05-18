@@ -8,15 +8,15 @@ filter_for_wood_saprotroph <- function(counts_df,
 
   start_col <- which(names(counts_df) == sep_col_name)
 
-  features <- names(counts_df[, 1:start_col])
+  wood.env <- names(counts_df[, 1:start_col])
   wood_saprotroph_names <- unique(sort(wood_saprotroph_df$organism))
 
   wood_saprotroph_only_df <- counts_df[names(counts_df)
-                                       %in% c(features, wood_saprotroph_names)]
+                                       %in% c(wood.env, wood_saprotroph_names)]
 
   # Remove rows whose sum of counts is zero
   num_counts_df <- wood_saprotroph_only_df[, (start_col+1):ncol(wood_saprotroph_only_df)]
   wood_saprotroph_only_df <- wood_saprotroph_only_df[rowSums(num_counts_df) != 0, ]
-  
+
   return(wood_saprotroph_only_df)
 }

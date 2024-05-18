@@ -15,10 +15,10 @@
 ## 4. Remove clusters that have more than 2 negative control values.
 ## 5. Combine labels and cluster data as a cleaned data frame.
 ## 6. Save the cleaned data frame as a CSV file.
-## NOTE: Please provide the in_features_file name and in_counts_file name
+## NOTE: Please provide the in_env_file name and in_counts_file name
 ################################################################################
 clean_counts <- function(in_counts_file,
-                         in_features_file,
+                         in_env_file,
                          dataset_name,
                          minimum_count=3,
                          sep_col_name = "_Splitter_") {
@@ -26,7 +26,7 @@ clean_counts <- function(in_counts_file,
   df <- read.csv(in_counts_file, sep = ";")
 
   # Load the labels file
-  features_df <- read.csv(in_features_file)
+  env_df <- read.csv(in_env_file)
 
   # Filter the dataset based on the pattern
   pattern <- paste(dataset_name, "tag([^\\s]+)([FR])_tag([^\\s]+)([FR])")
@@ -77,8 +77,14 @@ clean_counts <- function(in_counts_file,
   colnames(discriminator_df) <- sep_col_name
   discriminator_df[, 1] <- "X"
 
+  print(paste("nrow(tags_df):", nrow(tags_df),
+            "; nrow(env_df):", nrow(env_df),
+            "; nrow(discriminator_df):", nrow(discriminator_df),
+            "; nrow(clusters_df):", nrow(clusters_df)))
+  print(rownames(clusters_df))
+
   # Combine tags, labels, clusters
-  combined_df <- cbind(tags_df, features_df,
+  combined_df <- cbind(tags_df, env_df,
                        discriminator_df, clusters_df)
 
   # Determine if there are row tags that do not match with the label tags
@@ -91,20 +97,20 @@ clean_counts <- function(in_counts_file,
   # Remove columns with positive and negative control values greater than 2
   pos_rows <- clean_df[clean_df$Sample.Number == "POS",
                        !(names(clean_df) %in%
-                           c(names(features_df), sep_col_name))]
+                           c(names(env_df), sep_col_name))]
   columns_with_pos <- colnames(pos_rows)[apply(pos_rows, 2, function(x) max(x) >= minimum_count)]
   clean_df <- clean_df[, !(names(clean_df) %in% columns_with_pos)]
 
   neg_rows <- clean_df[clean_df$Sample.Number == "NEG",
                        !(names(clean_df) %in%
-                           c(names(features_df), sep_col_name))]
+                           c(names(env_df), sep_col_name))]
   columns_with_neg <- colnames(neg_rows)[apply(neg_rows, 2, function(x) max(x) >= minimum_count)]
   clean_df <- clean_df[, !(names(clean_df) %in% columns_with_neg)]
 
   # Remove the positive and negative control value rows
   clean_df <- clean_df[clean_df$Sample.Number != "POS", ]
   clean_df <- clean_df[clean_df$Sample.Number != "NEG", ]
-  
+
   # Remove rows whose sum of counts is zero
   start_col <- which(names(clean_df) == sep_col_name)
   num_counts_df <- clean_df[, (start_col+1):ncol(clean_df)]

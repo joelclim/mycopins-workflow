@@ -3,55 +3,65 @@ library(vegan)
 library(viridis)
 library(dplyr)
 
-working_folder_path <- "C:/Users/Joel/work/kean-stme-2903-11/mycopins/shiny-apps/mycopins/"
-data_file <- c(
-  paste0(working_folder_path, "data/FA23_complete_counts.csv"),
-  paste0(working_folder_path, "data/SP24_complete_counts.csv"),
-  paste0(working_folder_path, "data/transectC_complete_counts.csv"),
-  paste0(working_folder_path, "data/FA23_complete_counts_fungi.csv"),
-  paste0(working_folder_path, "data/SP24_complete_counts_fungi.csv"),
-  paste0(working_folder_path, "data/transectC_counts_fungi.csv"),
-  paste0(working_folder_path, "data/FA23_complete_counts_wood_saprotroph.csv"),
-  paste0(working_folder_path, "data/SP24_complete_counts_wood_saprotroph.csv"),
-  paste0(working_folder_path, "data/transectC_counts_wood_saprotroph.csv")
-)
+working_folder_path <- "C:/Users/Joel/work/kean-stme-2903-11/github.com/joelclim"
+setwd(working_folder_path)
 
-get_counts_data <- function(team, species) {
-  index <- as.numeric(team) + (as.numeric(species) - 1) * 3
+get_counts_data <- function(batch, species) {
+  if (1 == species) {
+    counts_file <- paste0("./data/", batch, "/complete_counts.csv")
+  } else if (2 == species) {        # genus/species
+    counts_file <- paste0("./data/", batch, "/complete_counts_fungi_only.csv")
+  } else if (3 == species) { # wood saprotrophs fungi
+    counts_file <- paste0("./data/", batch, "/complete_counts_wood_saprotrophs_only.csv")
+  }
   
-  return(read_csv(data_file[index]))
+  counts_df <- read_csv(counts_file)
+  
+  return(counts_df)
 }
 
-group <- 2 # FA23 + SP24
+method <- "bray"
+batch <- "SP24-transectC-1"
 species <- 1 # All species
 
-df <- get_counts_data(group, species)
+df <- get_counts_data(batch, species)
 discriminator_index <- which(names(df) == "_Splitter_")
 wood <- df[, (discriminator_index+1):ncol(df)]
 wood.env <- df[, 1:(discriminator_index-1)]
 
+wood.dist <- vegdist(wood, method = method)
+wood.mds <- metaMDS(wood, try=1000, distance = method, k = 2)
+
 ###############################################################################
 # Species Richness
-feature_label <- "Days.Elapsed"
+x_label <- "Days.Elapsed"
+y_label <- "SpeciesRichness"
 
 richness <- specnumber(wood)
-ggplot(df, aes(x=as.factor(Days.Elapsed), 
-               y=richness, 
-               fill=Days.Elapsed)) +
-  geom_boxplot(fill=viridis(1, alpha=0.70)) +
-  xlab(feature_label) +
-  ylab("Species Richness") +
+
+data <- wood
+data.env <- wood.env
+data.env$IndependentVariable <- data.env[[x_label]]
+data.env$SpeciesRichness <- specnumber(data)
+
+ggplot(data.env, aes(x = as.factor(IndependentVariable), y = SpeciesRichness)) +
+  geom_boxplot() +
+  labs(x = x_label, y = y_label) +
   theme_classic()
 
-summary_stats_by_factor <- df %>%
-  group_by(as.factor(Days.Elapsed)) %>%
-  summarise(
-    Mean = mean(richness),
-    SD = sd(richness),
-    Min = min(richness),
-    Max = max(richness),
-    .groups = 'drop' 
+box_plot_data <- data.env[, c(x_label, y_label)]
+summary_data <- box_plot_data %>%
+  group_by_at(x_label) %>%
+  summarize(
+    Count = n(),
+    Mean = mean(SpeciesRichness),
+    Median = median(SpeciesRichness),
+    Min = min(SpeciesRichness),
+    Max = max(SpeciesRichness),
+    SD = sd(SpeciesRichness)
   )
+summary_data
+
 
 ###############################################################################
 # Alpha Diversity
@@ -59,6 +69,7 @@ summary_stats_by_factor <- df %>%
 
 ###############################################################################
 # Beta Diversity
+beta_diversity_df <- as.data.frame(as.matrix(wood.dist))
 
 ###############################################################################
 # Gamma Diversity
@@ -66,17 +77,17 @@ summary_stats_by_factor <- df %>%
 df <- read_csv(data_file[4])
 
 discriminator_index <- which(names(df) == "_Splitter_")
-features_df <- df[, 1:(discriminator_index-1)]
+env_df <- df[, 1:(discriminator_index-1)]
 transectC_df <- df[, (discriminator_index+1):ncol(df)]
 any(rowSums(transectC_df, na.rm = TRUE) == 0)
 
 x <- transectC_df[apply(transectC_df!=0, 1, all), ]
 
-df <- cbind(features_df, transectC_df)
+df <- cbind(env_df, transectC_df)
 
 dissimilarity_index <- "bray"
 wood <- transectC_df
-wood.env <- features_df
+wood.env <- env_df
 wood.dist <- vegdist(transectC_df, method = dissimilarity_index)
 
 
@@ -86,7 +97,7 @@ wood.ado <- adonis2(wood ~ Season + Wood.Texture, data = wood.env)
 #ado <- wood.ado[,c('var', cols)]
 
 
-#paste0("ANOSIM statistic R: ", wood.ano["statistic"], 
+#paste0("ANOSIM statistic R: ", wood.ano["statistic"],
 #       "\n     Significance:", wood.ano["signif"])
 
 #wood.mds$stress

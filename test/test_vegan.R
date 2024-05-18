@@ -2,7 +2,8 @@ library(readr)
 library(vegan)
 library(viridis)
 
-working_folder_path <- "C:/Users/Joel/work/kean-stme-2903-11/github.com/joelclim/data"
+working_folder_path <- "C:/Users/Joel/work/kean-stme-2903-11/github.com/joelclim"
+setwd(working_folder_path)
 
 get_counts_data <- function(batch, species) {
   if (1 == species) {
@@ -12,9 +13,9 @@ get_counts_data <- function(batch, species) {
   } else if (3 == species) { # wood saprotrophs fungi
     counts_file <- paste0("./data/", batch, "/complete_counts_wood_saprotrophs_only.csv")
   }
-  
+
   counts_df <- read_csv(counts_file)
-  
+
   return(counts_df)
 }
 
@@ -33,10 +34,10 @@ wood.mds <- metaMDS(wood, try=1000, distance = method, k = 2)
 ###############################################################################
 # Ordination Plot
 type <- "none" # none, points, text
-features <- wood.env$Wood.Texture
-colors <- viridis(length(unique(features)))
+textures <- wood.env$Wood.Texture
+colors <- viridis(length(unique(textures)))
 ordiplot(wood.mds, type=type)
-ordiellipse(wood.mds, groups=features, draw="polygon", col=colors, label=TRUE)
+ordiellipse(wood.mds, groups=textures, draw="polygon", col=colors, label=TRUE)
 #orditorp(wood.mds, display="sites", cex=0.78, air=0.01)
 #orditorp(wood.mds, display="species", cex=0.50, col="red", air=0.01)
 
@@ -63,27 +64,27 @@ wood.ado
 # Alpha Diversity Index
 
 index = "shannon"
-features_df <- data.frame(Weeks.Elapsed = wood.env$Weeks.Elapsed, 
+env_df <- data.frame(Weeks.Elapsed = wood.env$Weeks.Elapsed,
                           Wood.Texture = wood.env$Wood.Texture)
-alpha_indices <- diversity(wood, index = index, 
-                    groups = as.formula(features_df$Weeks.Elapsed),
+alpha_indices <- diversity(wood, index = index,
+                    groups = as.formula(env_df$Weeks.Elapsed),
                     MARGIN=1)
 
-alpha_index_df <- data.frame(Feature = as.numeric(names(alpha_indices)), 
+alpha_index_df <- data.frame(Feature = as.numeric(names(alpha_indices)),
                              Alpha_Index = alpha_indices)
-alpha_index_df$Feature <- factor(alpha_index_df$Feature, 
+alpha_index_df$Feature <- factor(alpha_index_df$Feature,
                        levels = alpha_index_df$Feature[
                          order(as.numeric(alpha_index_df$Feature))])
 
-ggplot(alpha_index_df, aes(x = Feature , 
-                           y = Alpha_Index, 
+ggplot(alpha_index_df, aes(x = Feature ,
+                           y = Alpha_Index,
                            fill = Feature)) +
   geom_bar(stat = "identity", color = "black") +
-  geom_text(aes(label = round(Alpha_Index, 2)), 
+  geom_text(aes(label = round(Alpha_Index, 2)),
             position = position_stack(vjust = 1.05),
             color = "black", size = 3.5) +
   theme_minimal() +
-  labs(x = "Time", 
+  labs(x = "Time",
        y = index,
        fill = "Weeks.Elapsed") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
@@ -91,7 +92,7 @@ ggplot(alpha_index_df, aes(x = Feature ,
 ###############################################################################
 
 # List of predictors
-predictors <- c("Days.Elapsed", "Weeks.Elapsed", 
+predictors <- c("Days.Elapsed", "Weeks.Elapsed",
                 "Months.Elapsed", "Bimonthly.Elapsed",
                 "Season", "Wood.Type", "Wood.Texture")
 
@@ -114,5 +115,6 @@ paste(interaction_terms, collapse = " + ")
 # Print all formula strings
 print(formula_strings)
 
-
-
+###############################################################################
+# Species Richness
+wood.t = ftable(Site ~ Species, data = pd)
