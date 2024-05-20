@@ -83,10 +83,13 @@ mycopins_config <- function(batch_name, scata_dataset_name, scata_job_id) {
   genus_traits_file <- paste0(batch_directory, "mycopins_genus_traits.csv")
 
   counts_fungi_file <- paste0(batch_directory, "complete_counts_fungi.csv")
+  mycopins_environment_fungi_file <- paste0(batch_directory, "mycopins_environment_fungi.csv")
   mycopins_community_fungi_file <- paste0(batch_directory, "mycopins_community_fungi.csv")
 
   counts_wood_saprotroph_file <- paste0(
     batch_directory, "complete_counts_wood_saprotrophs.csv")
+  mycopins_environment_wood_saprotroph_file <- paste0(
+    batch_directory, "mycopins_environment_wood_saprotroph.csv")
   mycopins_community_wood_saprotroph_file <- paste0(
     batch_directory, "mycopins_community_wood_saprotroph.csv")
 
@@ -112,8 +115,10 @@ mycopins_config <- function(batch_name, scata_dataset_name, scata_job_id) {
     genus_traits_file = genus_traits_file,
     fungal_traits_file = fungal_traits_file,
     counts_fungi_file = counts_fungi_file,
+    mycopins_environment_fungi_file = mycopins_environment_fungi_file,
     mycopins_community_fungi_file = mycopins_community_fungi_file,
     counts_wood_saprotroph_file = counts_wood_saprotroph_file,
+    mycopins_environment_wood_saprotroph_file = mycopins_environment_wood_saprotroph_file,
     mycopins_community_wood_saprotroph_file = mycopins_community_wood_saprotroph_file
   ))
 }
@@ -263,6 +268,10 @@ get_fungi_only_counts <- function(configuration) {
   write.csv(counts_fungi_df, file = counts_fungi_file, row.names = FALSE)
 
   sep_index <- which(names(counts_fungi_df) == "_Splitter_")
+  environment_fungi_df <- counts_fungi_df[, 1:(sep_index-1)]
+  mycopins_environment_fungi_file = configuration["mycopins_environment_fungi_file"]
+  write.csv(environment_fungi_df, file = mycopins_environment_fungi_file, row.names = FALSE)
+
   community_fungi_df <- counts_fungi_df[, (sep_index+1):ncol(counts_fungi_df)]
   mycopins_community_fungi_file = configuration["mycopins_community_fungi_file"]
   write.csv(community_fungi_df, file = mycopins_community_fungi_file, row.names = FALSE)
@@ -296,7 +305,14 @@ get_wood_saprotrophs_fungi_counts <- function(configuration) {
             file = counts_wood_saprotroph_file, row.names = FALSE)
 
   sep_index <- which(names(counts_wood_saprotroph_df) == "_Splitter_")
-  community_wood_saprotroph_df <- counts_wood_saprotroph_df[, (sep_index+1):ncol(counts_wood_saprotroph_df)]
+  environment_wood_saprotroph_df <- counts_wood_saprotroph_df[, 1:(sep_index-1)]
+  mycopins_environment_wood_saprotroph_file = configuration["mycopins_environment_wood_saprotroph_file"]
+  write.csv(environment_wood_saprotroph_df,
+            file = mycopins_environment_wood_saprotroph_file,
+            row.names = FALSE)
+
+  community_wood_saprotroph_df <- counts_wood_saprotroph_df[,
+                                    (sep_index+1):ncol(counts_wood_saprotroph_df)]
   mycopins_community_wood_saprotroph_file = configuration["mycopins_community_wood_saprotroph_file"]
   write.csv(community_wood_saprotroph_df,
             file = mycopins_community_wood_saprotroph_file,
