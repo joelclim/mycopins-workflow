@@ -4,7 +4,6 @@ library("rgbif")
 
 get_gbif_taxon <- function(organisms) {
   get_gbif_taxon <- function(organism) {
-    print(paste("Retrieving gbif record for", organism))
     response <- name_backbone_verbose(name=organism, kingdom="fungi")
     taxon <- response$data
     if (taxon$matchType == "NONE") {
