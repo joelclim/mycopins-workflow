@@ -11,13 +11,13 @@ source(paste0(lib_directory, "merge_counts.R"))
 source(paste0(lib_directory, "get_gbif_taxon.R"))
 source(paste0(lib_directory, "get_fungal_traits.R"))
 
-# Filter for Fungi
-source(paste0(lib_directory, "filter_for_fungi.R"))
-source(paste0(lib_directory, "filter_for_wood_saprotroph.R"))
-
 mycopins_merge_config <- function(merge_name,
                                   first_name,
                                   second_name) {
+  reference_data_directory <- "./reference-data/"
+  fungal_traits_directory <- paste0(reference_data_directory, "fungaltraits/")
+  fungal_traits_file <- paste0(fungal_traits_directory, "fungal_traits_for_genera.csv")
+
   data_directory <- "./data/"
 
   merge_directory <- paste0(data_directory, merge_name, "/")
@@ -29,6 +29,14 @@ mycopins_merge_config <- function(merge_name,
                                                  "mycopins_environment_wood_saprotroph.csv")
   merge_community_wood_saprotroph_file <- paste0(merge_directory,
                                                  "mycopins_community_wood_saprotroph.csv")
+  merge_gbif_taxon_file <- paste0(merge_directory, "mycopins_gbif_taxon.csv")
+  merge_gbif_taxon_fungi_file <- paste0(merge_directory, "mycopins_gbif_taxon_fungi.csv")
+  merge_gbif_taxon_wood_saprotroph_file <- paste0(merge_directory,
+                                                  "mycopins_gbif_taxon_wood_saprotroph.csv")
+  merge_genus_traits_file <- paste0(merge_directory, "mycopins_genus_traits.csv")
+  merge_genus_traits_fungi_file <- paste0(merge_directory, "mycopins_genus_traits_fungi.csv")
+  merge_genus_traits_wood_saprotroph_file <- paste0(merge_directory,
+                                                    "mycopins_genus_trait_wood_saprotroph.csv")
 
   first_directory <- paste0(data_directory, first_name, "/")
   first_environment_file <- paste0(first_directory, "mycopins_environment.csv")
@@ -58,6 +66,13 @@ mycopins_merge_config <- function(merge_name,
     merge_community_fungi_file = merge_community_fungi_file,
     merge_environment_wood_saprotroph_file = merge_environment_wood_saprotroph_file,
     merge_community_wood_saprotroph_file = merge_community_wood_saprotroph_file,
+    merge_gbif_taxon_file = merge_gbif_taxon_file,
+    merge_gbif_taxon_fungi_file = merge_gbif_taxon_fungi_file,
+    merge_gbif_taxon_wood_saprotroph_file = merge_gbif_taxon_wood_saprotroph_file,
+    merge_genus_traits_file = merge_genus_traits_file,
+    merge_genus_traits_fungi_file = merge_genus_traits_fungi_file,
+    merge_genus_traits_wood_saprotroph_file = merge_genus_traits_wood_saprotroph_file,
+    fungal_traits_file = fungal_traits_file,
     first_directory = first_directory,
     first_environment_file = first_environment_file,
     first_community_file = first_community_file,
@@ -76,28 +91,54 @@ mycopins_merge_config <- function(merge_name,
 }
 
 mycopins_merge <- function(configuration) {
-  print("[Merge] All counts")
+  print("[Merge] Merge all counts")
   mycopins_merge_counts(configuration["first_environment_file"],
                         configuration["first_community_file"],
                         configuration["second_environment_file"],
                         configuration["second_community_file"],
                         configuration["merge_environment_file"],
                         configuration["merge_community_file"])
-  print("[Merge] Fungi only counts")
+  print("[Merge] Merge fungi only counts")
   mycopins_merge_counts(configuration["first_environment_fungi_file"],
                         configuration["first_community_fungi_file"],
                         configuration["second_environment_fungi_file"],
                         configuration["second_community_fungi_file"],
                         configuration["merge_environment_fungi_file"],
                         configuration["merge_community_fungi_file"])
-  print("[Merge] Wood Saprotrophs only counts")
+  print("[Merge] Merge wood saprotrophs only counts")
   mycopins_merge_counts(configuration["first_environment_wood_saprotroph_file"],
                         configuration["first_community_wood_saprotroph_file"],
                         configuration["second_environment_wood_saprotroph_file"],
                         configuration["second_community_wood_saprotroph_file"],
                         configuration["merge_environment_wood_saprotroph_file"],
                         configuration["merge_community_wood_saprotroph_file"])
+
+  print("[Merge] GBIF Taxonomy for all")
+  mycopins_merge_gbif_taxon(configuration["merge_community_file"],
+                            configuration["merge_gbif_taxon_file"])
+
+  print("[Merge] GBIF Taxonomy for fungi only")
+  mycopins_merge_gbif_taxon(configuration["merge_community_fungi_file"],
+                            configuration["merge_gbif_taxon_fungi_file"])
+
+  print("[Merge] GBIF Taxonomy for wood saprotrophs only")
+  mycopins_merge_gbif_taxon(configuration["merge_community_wood_saprotroph_file"],
+                            configuration["merge_gbif_taxon_wood_saprotroph_file"])
+
+  print("[Merge] Fungal Traits for all")
+  mycopins_merge_fungal_traits(configuration["merge_gbif_taxon_file"],
+                               configuration["merge_genus_traits_file"])
+
+  print("[Merge] Fungal Traits for fungi only")
+  mycopins_merge_fungal_traits(configuration["merge_gbif_taxon_fungi_file"],
+                               configuration["merge_genus_traits_fungi_file"])
+
+  print("[Merge] Fungal Traits for wood saprotrophs only")
+  mycopins_merge_fungal_traits(configuration["merge_gbif_taxon_wood_saprotroph_file"],
+                               configuration["merge_genus_traits_wood_saprotroph_file"])
+
 }
+
 
 mycopins_merge_counts <- function(first_environment_file,
                                   first_community_file,
@@ -116,4 +157,24 @@ mycopins_merge_counts <- function(first_environment_file,
   second <- read_csv(second_community_file, show_col_types = FALSE)
   merged <- merge_communities(merged.env, first, second)
   write.csv(merged, file = merge_community_file, row.names = FALSE)
+}
+
+
+mycopins_merge_gbif_taxon <- function(community_file, gbif_taxon_file) {
+  community <- read_csv(community_file, show_col_types = FALSE)
+  organisms <- unique(sort(names(community)))
+
+  gbif_taxon_df <- get_gbif_taxon(organisms)
+  write.csv(gbif_taxon_df, file = gbif_taxon_file, row.names = FALSE)
+}
+
+
+mycopins_merge_fungal_traits <- function(gbif_taxon_file, genus_traits_file) {
+  gbif_taxon_df <- read_csv(gbif_taxon_file, show_col_types = FALSE)
+
+  fungal_traits_file <- configuration["fungal_traits_file"]
+  fungal_traits_df <- read_csv(fungal_traits_file, show_col_types = FALSE)
+
+  genus_traits_df <- get_fungal_traits(fungal_traits_df, gbif_taxon_df)
+  write.csv(genus_traits_df, file = genus_traits_file, row.names = FALSE)
 }

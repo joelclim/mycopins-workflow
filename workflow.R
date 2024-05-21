@@ -225,11 +225,10 @@ get_clusters_gbif_taxon <- function(configuration) {
   complete_clusters_file = configuration["complete_clusters_file"]
   complete_clusters_df <- read_csv(complete_clusters_file, show_col_types = FALSE)
 
-  gbif_taxon_file <- configuration["gbif_taxon_file"]
-
   # Get gbif taxonomy for all identified organisms
   organisms <- unique(sort(complete_clusters_df$normalized_name))
 
+  gbif_taxon_file <- configuration["gbif_taxon_file"]
   gbif_taxon_df <- get_gbif_taxon(organisms)
   write.csv(gbif_taxon_df, file = gbif_taxon_file, row.names = FALSE)
 
@@ -246,7 +245,6 @@ get_gbif_taxon_fungal_traits <- function(configuration) {
   fungal_traits_df <- read_csv(fungal_traits_file, show_col_types = FALSE)
 
   genus_traits_file <- configuration["genus_traits_file"]
-
   genus_traits_df <- get_fungal_traits(fungal_traits_df, gbif_taxon_df)
   write.csv(genus_traits_df, file = genus_traits_file, row.names = FALSE)
 
