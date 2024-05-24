@@ -36,7 +36,7 @@ mycopins_merge_config <- function(merge_name,
   merge_genus_traits_file <- paste0(merge_directory, "mycopins_genus_traits.csv")
   merge_genus_traits_fungi_file <- paste0(merge_directory, "mycopins_genus_traits_fungi.csv")
   merge_genus_traits_wood_saprotroph_file <- paste0(merge_directory,
-                                                    "mycopins_genus_trait_wood_saprotroph.csv")
+                                                    "mycopins_genus_traits_wood_saprotroph.csv")
 
   first_directory <- paste0(data_directory, first_name, "/")
   first_environment_file <- paste0(first_directory, "mycopins_environment.csv")

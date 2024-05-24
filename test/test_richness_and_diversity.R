@@ -6,50 +6,78 @@ library(dplyr)
 working_folder_path <- "C:/Users/Joel/work/kean-stme-2903-11/github.com/joelclim"
 setwd(working_folder_path)
 
-get_counts_data <- function(batch, species) {
+
+get_community_data <- function(transect, species) {
   if (1 == species) {
-    counts_file <- paste0("./data/", batch, "/complete_counts.csv")
-  } else if (2 == species) {        # genus/species
-    counts_file <- paste0("./data/", batch, "/complete_counts_fungi_only.csv")
+    community_file <- paste0("./data/", transect, "/mycopins_community.csv")
+  } else if (2 == species) { # genus/species
+    community_file <- paste0("./data/", transect, "/mycopins_community_fungi.csv")
   } else if (3 == species) { # wood saprotrophs fungi
-    counts_file <- paste0("./data/", batch, "/complete_counts_wood_saprotrophs_only.csv")
+    community_file <- paste0("./data/", transect, "/mycopins_community_wood_saprotroph.csv")
   }
   
-  counts_df <- read_csv(counts_file)
+  community_df <- read_csv(community_file, show_col_types = FALSE)
   
-  return(counts_df)
+  return(community_df)
 }
 
+
+get_environment_data <- function(transect, species) {
+  if (1 == species) {
+    environment_file <- paste0("./data/", transect, "/mycopins_environment.csv")
+  } else if (2 == species) { # genus/species
+    environment_file <- paste0("./data/", transect, "/mycopins_environment_fungi.csv")
+  } else if (3 == species) { # wood saprotrophs fungi
+    environment_file <- paste0("./data/", transect, "/mycopins_environment_wood_saprotroph.csv")
+  }
+  
+  environment_df <- read_csv(environment_file, show_col_types = FALSE)
+  
+  return(environment_df)
+}
+
+
 method <- "bray"
-batch <- "SP24-transectC-1"
+batch <- "All"
 species <- 1 # All species
 
-df <- get_counts_data(batch, species)
-discriminator_index <- which(names(df) == "_Splitter_")
-wood <- df[, (discriminator_index+1):ncol(df)]
-wood.env <- df[, 1:(discriminator_index-1)]
+mycopins <- get_community_data(batch, species)
+mycopins.env <- get_environment_data(batch, species)
 
-wood.dist <- vegdist(wood, method = method)
-wood.mds <- metaMDS(wood, try=1000, distance = method, k = 2)
+mycopins.dist <- vegdist(mycopins, method = method)
+mycopins.mds <- metaMDS(mycopins, try=1000, distance = method, k = 2)
+
+###############################################################################
+# Species Frequency
+# mycopins.data <- cbind(mycopins.env, mycopins)
+# x_label <- "Days.Elapsed"
+# species_frequency <- t(mycopins.data) %>%
+#   group_by_at(x_label) %>%
+#   summarize(
+#     Count = n()
+#   )
+# species_frequency
+
+
 
 ###############################################################################
 # Species Richness
 x_label <- "Days.Elapsed"
 y_label <- "SpeciesRichness"
 
-richness <- specnumber(wood)
+richness <- specnumber(mycopins)
 
-data <- wood
-data.env <- wood.env
+data <- mycopins
+data.env <- mycopins.env
 data.env$IndependentVariable <- data.env[[x_label]]
-data.env$SpeciesRichness <- specnumber(data)
-
+data.env$SpeciesRichness <- log2(specnumber(data))
 ggplot(data.env, aes(x = as.factor(IndependentVariable), y = SpeciesRichness)) +
   geom_boxplot() +
   labs(x = x_label, y = y_label) +
   theme_classic()
 
 box_plot_data <- data.env[, c(x_label, y_label)]
+
 summary_data <- box_plot_data %>%
   group_by_at(x_label) %>%
   summarize(
@@ -69,7 +97,7 @@ summary_data
 
 ###############################################################################
 # Beta Diversity
-beta_diversity_df <- as.data.frame(as.matrix(wood.dist))
+beta_diversity_df <- as.data.frame(as.matrix(mycopins.dist))
 
 ###############################################################################
 # Gamma Diversity
@@ -86,14 +114,10 @@ x <- transectC_df[apply(transectC_df!=0, 1, all), ]
 df <- cbind(env_df, transectC_df)
 
 dissimilarity_index <- "bray"
-wood <- transectC_df
-wood.env <- env_df
-wood.dist <- vegdist(transectC_df, method = dissimilarity_index)
-
-
-wood.mds <- metaMDS(transectC_df, try=1000, distance = dissimilarity_index, k = 2)
-wood.ano <- with(wood.env, anosim(wood.dist, Wood.Texture))
-wood.ado <- adonis2(wood ~ Season + Wood.Texture, data = wood.env)
+mycopins.dist <- vegdist(mycopins, method = dissimilarity_index)
+mycopins.mds <- metaMDS(mycopins, try=1000, distance = dissimilarity_index, k = 2)
+mycopins.ano <- with(mycopins.env, anosim(wood.dist, Wood.Texture))
+mycopins.ado <- adonis2(mycopins ~ Season + Wood.Texture, data = mycopins.env)
 #ado <- wood.ado[,c('var', cols)]
 
 
@@ -103,7 +127,7 @@ wood.ado <- adonis2(wood ~ Season + Wood.Texture, data = wood.env)
 #wood.mds$stress
 
 library(ggplot2)
-data <- t(wood)
+data <- t(mycopins)
 species <- rownames(data)
 data <- data.frame(species=species, data)
 richness <- specnumber(data)
