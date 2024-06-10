@@ -13,9 +13,20 @@ filter_for_fungi <- function(counts_df,
                                     fungi_taxon_df$acceptedNameUsage,
                                     fungi_taxon_df$originalNameUsage)))
 
-  # Exclude: "fungus" in ('uncultured fungi', 'fungal sp.')
+  # TODO: QC
+  # Exclude: fungi with names like "Fungus", "Fungi", or mock
+  fungi_names <- setdiff(fungi_names, c("Fungus", "Fungi", "mock"))
+
+  # TODO: QC
+  # Exclude: fungi with bit_score less than 200
+  less_than_200_df <- subset(gbif_taxon_df, searchBitScore < 200)
+  less_than_200_fungi_names <- unique(sort(ifelse(!is.na(less_than_200_df$acceptedNameUsage),
+                                    less_than_200_df$acceptedNameUsage,
+                                    less_than_200_df$originalNameUsage)))
+
+  fungi_names <- setdiff(fungi_names, less_than_200_fungi_names)
+
   fungi_only_df <- counts_df[names(counts_df) %in% c(wood.env, fungi_names)]
-  fungi_only_df <- fungi_only_df[names(fungi_only_df) != "Fungus"]
 
   # Remove rows whose sum of counts is zero
   num_counts_df <- fungi_only_df[, (start_col+1):ncol(fungi_only_df)]

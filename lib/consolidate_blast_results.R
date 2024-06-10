@@ -25,6 +25,7 @@ consolidate_batch_blast_result <- function(blast_result_json, scata_job_id) {
   evalues <- c()
   evalue_coefficients <- c()
   evalue_exponents <- c()
+  bit_scores <- c()
   identities <- c()
   align_lens <- c()
   percent_identities <- c()
@@ -56,6 +57,7 @@ consolidate_batch_blast_result <- function(blast_result_json, scata_job_id) {
       evalues <- c(evalues, as.numeric(evalue[1]))
       evalue_coefficients <- c(evalue_coefficients, as.numeric(coefficient[1]))
       evalue_exponents <- c(evalue_exponents, as.numeric(exponent[1]))
+      bit_scores <- c(bit_scores, as.numeric(hits$hsps[[j]]$bit_score[1]))
       identities <- c(identities, as.numeric(hits$hsps[[j]]$identity[1]))
       align_lens <- c(align_lens, as.numeric(hits$hsps[[j]]$align_len[1]))
       percent_identities <- c(percent_identities,
@@ -76,6 +78,7 @@ consolidate_batch_blast_result <- function(blast_result_json, scata_job_id) {
     evalue = evalues,
     evalue_coefficient = evalue_coefficients,
     evalue_exponent = evalue_exponents,
+    bit_score = bit_scores,
     identity = identities,
     align_len = align_lens,
     percent_identity = percent_identities

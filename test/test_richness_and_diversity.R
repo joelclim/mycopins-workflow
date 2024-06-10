@@ -2,6 +2,7 @@ library(readr)
 library(vegan)
 library(viridis)
 library(dplyr)
+library(ggplot2)
 
 working_folder_path <- "C:/Users/Joel/work/kean-stme-2903-11/github.com/joelclim"
 setwd(working_folder_path)
@@ -38,7 +39,7 @@ get_environment_data <- function(transect, species) {
 
 
 method <- "bray"
-batch <- "All"
+batch <- "TransectA"
 species <- 1 # All species
 
 mycopins <- get_community_data(batch, species)
@@ -62,7 +63,7 @@ mycopins.mds <- metaMDS(mycopins, try=1000, distance = method, k = 2)
 
 ###############################################################################
 # Species Richness
-x_label <- "Days.Elapsed"
+x_label <- "Transect"
 y_label <- "SpeciesRichness"
 
 richness <- specnumber(mycopins)
@@ -70,7 +71,7 @@ richness <- specnumber(mycopins)
 data <- mycopins
 data.env <- mycopins.env
 data.env$IndependentVariable <- data.env[[x_label]]
-data.env$SpeciesRichness <- log2(specnumber(data))
+data.env$SpeciesRichness <- specnumber(data)
 ggplot(data.env, aes(x = as.factor(IndependentVariable), y = SpeciesRichness)) +
   geom_boxplot() +
   labs(x = x_label, y = y_label) +
@@ -89,6 +90,8 @@ summary_data <- box_plot_data %>%
     SD = sd(SpeciesRichness)
   )
 summary_data
+
+richness
 
 
 ###############################################################################

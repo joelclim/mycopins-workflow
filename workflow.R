@@ -219,7 +219,7 @@ mycopins_annotate <- function(configuration) {
   print("[Annotate] Complete!")
 }
 
-
+# TODO: rename get_clusters_gbif_taxon_and_fungal_traits
 get_clusters_gbif_taxon <- function(configuration) {
   print("[GBIF Taxonomy] Retrieve GBIF taxonomy for cluster organisms")
   complete_clusters_file = configuration["complete_clusters_file"]
@@ -228,8 +228,11 @@ get_clusters_gbif_taxon <- function(configuration) {
   # Get gbif taxonomy for all identified organisms
   organisms <- unique(sort(complete_clusters_df$normalized_name))
 
+  fungal_traits_file <- configuration["fungal_traits_file"]
+  fungal_traits_df <- read_csv(fungal_traits_file, show_col_types = FALSE)
+
   gbif_taxon_file <- configuration["gbif_taxon_file"]
-  gbif_taxon_df <- get_gbif_taxon(organisms)
+  gbif_taxon_df <- get_gbif_taxon(organisms, complete_clusters_df, fungal_traits_df)
   write.csv(gbif_taxon_df, file = gbif_taxon_file, row.names = FALSE)
 
   print("[GBIF Taxonomy] Complete!")

@@ -62,6 +62,8 @@ apply_top_match_to_clusters <- function(top_match_df, cleaned_clusters_df) {
   keep_column_names <- append(keep_column_names, "taxid", after = 4)
   keep_column_names <- append(keep_column_names, "accession", after = 4)
   keep_column_names <- append(keep_column_names, "source", after = 4)
+  keep_column_names <- append(keep_column_names, "evalue", after = 4)
+  keep_column_names <- append(keep_column_names, "bit_score", after = 4)
   keep_column_names <- append(keep_column_names, "percent_identity", after = 4)
   keep_column_names <- append(keep_column_names, "gbif_accepted_name", after = 4)
   keep_column_names <- append(keep_column_names, "normalized_name", after = 4)
@@ -71,12 +73,20 @@ apply_top_match_to_clusters <- function(top_match_df, cleaned_clusters_df) {
   drop_column_names <- c(names(top_match_df), "X")
   drop_column_names <- drop_column_names[!drop_column_names %in%
                                            c("cluster_id",
+                                             "evalue",
+                                             "bit_score",
                                              "percent_identity",
                                              "taxid",
                                              "accession")]
   merge_df <- merge_df[, !names(merge_df) %in% drop_column_names]
 
-  # Percent Identity of Reference identified by SCATA is 100%S
+  # EValue of  Reference identified by SCATA is 0. Not determined by chance.
+  merge_df[["evalue"]][is.na(merge_df[["evalue"]])] <- 0
+
+  # Bit-Score of Reference identified by SCATA is 999.
+  merge_df[["bit_score"]][is.na(merge_df[["bit_score"]])] <- 999
+
+  # Percent Identity of Reference identified by SCATA is 100%
   merge_df[["percent_identity"]][is.na(merge_df[["percent_identity"]])] <- 100
 
   # Restore the "Cluster ID" column name
