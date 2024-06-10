@@ -22,6 +22,7 @@ mycopins_merge_config <- function(merge_name,
   merge_environment_fungi_file <- paste0(merge_directory, "mycopins_environment_fungi.csv")
   merge_community_fungi_file <- paste0(merge_directory, "mycopins_community_fungi.csv")
   merge_gbif_taxon_file <- paste0(merge_directory, "mycopins_gbif_taxon.csv")
+  merge_gbif_taxon_fungi_file <- paste0(merge_directory, "mycopins_gbif_taxon_fungi.csv")
 
   first_directory <- paste0(data_directory, first_name, "/")
   first_environment_file <- paste0(first_directory, "mycopins_environment.csv")
@@ -44,6 +45,7 @@ mycopins_merge_config <- function(merge_name,
     merge_environment_fungi_file = merge_environment_fungi_file,
     merge_community_fungi_file = merge_community_fungi_file,
     merge_gbif_taxon_file = merge_gbif_taxon_file,
+    merge_gbif_taxon_fungi_file = merge_gbif_taxon_fungi_file,
     first_directory = first_directory,
     first_environment_file = first_environment_file,
     first_community_file = first_community_file,
@@ -79,6 +81,10 @@ mycopins_merge <- function(configuration) {
   mycopins_merge_gbif_taxon(configuration["first_gbif_taxon_file"],
                             configuration["second_gbif_taxon_file"],
                             configuration["merge_gbif_taxon_file"])
+
+  mycopins_merge_gbif_taxon(configuration["first_gbif_taxon_file"],
+                            configuration["second_gbif_taxon_file"],
+                            configuration["merge_gbif_taxon_fungi_file"], TRUE)
 }
 
 
@@ -104,18 +110,22 @@ mycopins_merge_counts <- function(first_environment_file,
 
 mycopins_merge_gbif_taxon <- function(first_gbif_taxon_file,
                                       second_gbif_taxon_file,
-                                      merge_gbif_taxon_file) {
+                                      merge_gbif_taxon_file,
+                                      fungi_only = FALSE) {
   # Merge environments
   first.gbif_taxon <- read_csv(first_gbif_taxon_file, show_col_types = FALSE)
   second.gbif_taxon <- read_csv(second_gbif_taxon_file, show_col_types = FALSE)
   merged.gbif_taxon <- rbind(first.gbif_taxon, second.gbif_taxon)
   merged.gbif_taxon <- cbind(rowId = rownames(merged.gbif_taxon), merged.gbif_taxon)
 
-  organisms <- unique(subset(merged.gbif_taxon, taxonKey != "KINGDOM")$organism)
-  organisms <- setdiff(organisms, c("alga",
-                                    "fungi", "fungus",
-                                    "Fungi", "Fungus",
-                                    "mock", "uncultured organism"))
+  organisms <- unique(merged.gbif_taxon$organism)
+  if (fungi_only) {
+    organisms <- unique(subset(merged.gbif_taxon, taxonKey != "KINGDOM")$organism)
+    organisms <- setdiff(organisms, c("alga",
+                                      "fungi", "fungus",
+                                      "Fungi", "Fungus",
+                                      "mock", "uncultured organism"))
+  }
 
   rows_to_keep <- c()
   for (organism_name in organisms) {
