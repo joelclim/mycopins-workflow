@@ -1,6 +1,6 @@
-get_fungal_traits <- function(fungal_traits_df, gbif_taxon_df) {
-  has_genus_df <- gbif_taxon_df[!is.na(gbif_taxon_df$genus), ]
-  genus <- unique(sort(has_genus_df$genus))
+get_fungal_traits <- function(fungal_traits_df, organism_df) {
+  has_genus_df <- organism_df[!is.na(organism_df$gbif.genus), ]
+  genus <- unique(sort(has_genus_df$gbif.genus))
 
   genus_traits_df <- fungal_traits_df[fungal_traits_df$GENUS %in% genus,]
   return(genus_traits_df)

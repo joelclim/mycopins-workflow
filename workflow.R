@@ -18,7 +18,7 @@ source(paste0(lib_directory, "apply_top_match_to_clusters.R"))
 source(paste0(lib_directory, "apply_match_to_counts.R"))
 
 # Taxonomy and Traits
-source(paste0(lib_directory, "get_gbif_taxon.R"))
+source(paste0(lib_directory, "create_organism_dataset.R"))
 source(paste0(lib_directory, "get_fungal_traits.R"))
 
 # Filter for Fungi
@@ -42,8 +42,8 @@ run_workflow <- function(batch_name, scata_dataset_name, scata_job_id) {
   mycopins_identify(configuration)
   mycopins_annotate(configuration)
 
-  get_clusters_gbif_taxon(configuration)
-  get_gbif_taxon_fungal_traits(configuration)
+  get_fungal_traits_of_organisms(configuration)
+
   get_fungi_only_counts(configuration)
   get_wood_saprotrophs_fungi_counts(configuration)
 
@@ -79,7 +79,7 @@ mycopins_config <- function(batch_name, scata_dataset_name, scata_job_id) {
   complete_counts_file <- paste0(batch_directory, "complete_counts.csv")
   mycopins_environment_file <- paste0(batch_directory, "mycopins_environment.csv")
   mycopins_community_file <- paste0(batch_directory, "mycopins_community.csv")
-  gbif_taxon_file <- paste0(batch_directory, "mycopins_gbif_taxon.csv")
+  mycopins_organisms_file <- paste0(batch_directory, "mycopins_organisms.csv")
   genus_traits_file <- paste0(batch_directory, "mycopins_genus_traits.csv")
 
   counts_fungi_file <- paste0(batch_directory, "complete_counts_fungi.csv")
@@ -111,7 +111,7 @@ mycopins_config <- function(batch_name, scata_dataset_name, scata_job_id) {
     complete_counts_file = complete_counts_file,
     mycopins_environment_file = mycopins_environment_file,
     mycopins_community_file = mycopins_community_file,
-    gbif_taxon_file = gbif_taxon_file,
+    mycopins_organisms_file = mycopins_organisms_file,
     genus_traits_file = genus_traits_file,
     fungal_traits_file = fungal_traits_file,
     counts_fungi_file = counts_fungi_file,
@@ -216,39 +216,31 @@ mycopins_annotate <- function(configuration) {
   community_df <- complete_counts_df[, (sep_index+1):ncol(complete_counts_df)]
   write.csv(community_df, file = mycopins_community_file, row.names = FALSE)
 
-  print("[Annotate] Complete!")
-}
-
-# TODO: rename get_clusters_gbif_taxon_and_fungal_traits
-get_clusters_gbif_taxon <- function(configuration) {
-  print("[GBIF Taxonomy] Retrieve GBIF taxonomy for cluster organisms")
-  complete_clusters_file = configuration["complete_clusters_file"]
-  complete_clusters_df <- read_csv(complete_clusters_file, show_col_types = FALSE)
-
-  # Get gbif taxonomy for all identified organisms
-  organisms <- unique(sort(complete_clusters_df$normalized_name))
+  # Apply match to counts
+  print("[Annotate] Create organism dataset")
+  organisms <- unique(sort(complete_clusters_df$gbif_accepted_name))
 
   fungal_traits_file <- configuration["fungal_traits_file"]
   fungal_traits_df <- read_csv(fungal_traits_file, show_col_types = FALSE)
 
-  gbif_taxon_file <- configuration["gbif_taxon_file"]
-  gbif_taxon_df <- get_gbif_taxon(organisms, complete_clusters_df, fungal_traits_df)
-  write.csv(gbif_taxon_df, file = gbif_taxon_file, row.names = FALSE)
+  mycopins_organisms_file <- configuration["mycopins_organisms_file"]
+  mycopins_organisms_df <- create_organism_dataset(organisms, complete_clusters_df, fungal_traits_df)
+  write.csv(mycopins_organisms_df, file = mycopins_organisms_file, row.names = FALSE)
 
-  print("[GBIF Taxonomy] Complete!")
+  print("[Annotate] Complete!")
 }
 
 
-get_gbif_taxon_fungal_traits <- function(configuration) {
+get_fungal_traits_of_organisms <- function(configuration) {
   print("[Fungal Traits] Retrieve Fungal Traits of cluster organisms")
-  gbif_taxon_file <- configuration["gbif_taxon_file"]
-  gbif_taxon_df <- read_csv(gbif_taxon_file, show_col_types = FALSE)
+  mycopins_organisms_file <- configuration["mycopins_organisms_file"]
+  mycopins_organisms_df <- read_csv(mycopins_organisms_file, show_col_types = FALSE)
 
   fungal_traits_file <- configuration["fungal_traits_file"]
   fungal_traits_df <- read_csv(fungal_traits_file, show_col_types = FALSE)
 
   genus_traits_file <- configuration["genus_traits_file"]
-  genus_traits_df <- get_fungal_traits(fungal_traits_df, gbif_taxon_df)
+  genus_traits_df <- get_fungal_traits(fungal_traits_df, mycopins_organisms_df)
   write.csv(genus_traits_df, file = genus_traits_file, row.names = FALSE)
 
   print("[Fungal Traits] Complete")
@@ -260,12 +252,12 @@ get_fungi_only_counts <- function(configuration) {
   complete_counts_file = configuration["complete_counts_file"]
   complete_counts_df <- read_csv(complete_counts_file, show_col_types = FALSE)
 
-  print("[Fungi Only] Loading GBIF taxonomy")
-  gbif_taxon_file <- configuration["gbif_taxon_file"]
-  gbif_taxon_df <- read_csv(gbif_taxon_file, show_col_types = FALSE)
+  print("[Fungi Only] Loading organisms dataset")
+  mycopins_organisms_file <- configuration["mycopins_organisms_file"]
+  mycopins_organisms_df <- read_csv(mycopins_organisms_file, show_col_types = FALSE)
 
   counts_fungi_file <- configuration["counts_fungi_file"]
-  counts_fungi_df <- filter_for_fungi(complete_counts_df, gbif_taxon_df)
+  counts_fungi_df <- filter_for_fungi(complete_counts_df, mycopins_organisms_df)
   write.csv(counts_fungi_df, file = counts_fungi_file, row.names = FALSE)
 
   sep_index <- which(names(counts_fungi_df) == "_Splitter_")
@@ -294,13 +286,13 @@ get_wood_saprotrophs_fungi_counts <- function(configuration) {
   complete_counts_file = configuration["complete_counts_file"]
   complete_counts_df <- read_csv(complete_counts_file, show_col_types = FALSE)
 
-  print("[Wood Saprotroph Only] Loading GBIF taxonomy")
-  gbif_taxon_file <- configuration["gbif_taxon_file"]
-  gbif_taxon_df <- read_csv(gbif_taxon_file, show_col_types = FALSE)
+  print("[Wood Saprotroph Only] Loading organism dataset")
+  mycopins_organisms_file <- configuration["mycopins_organisms_file"]
+  mycopins_organisms_df <- read_csv(mycopins_organisms_file, show_col_types = FALSE)
 
   counts_wood_saprotroph_file <- configuration["counts_wood_saprotroph_file"]
   counts_wood_saprotroph_df <- filter_for_wood_saprotroph(
-    complete_counts_df, gbif_taxon_df, wood_saprotrophs_df)
+    complete_counts_df, mycopins_organisms_df, wood_saprotrophs_df)
 
   write.csv(counts_wood_saprotroph_df,
             file = counts_wood_saprotroph_file, row.names = FALSE)

@@ -1,9 +1,9 @@
 filter_for_wood_saprotroph <- function(counts_df,
-                                       gbif_taxon_df,
+                                       organism_df,
                                        wood_saprotroph_traits_df,
                                        sep_col_name = "_Splitter_") {
-  fungi_taxon_df <- gbif_taxon_df[nchar(gbif_taxon_df$phylum) > 0,]
-  wood_saprotroph_df <- fungi_taxon_df[fungi_taxon_df$genus
+  fungi_taxon_df <- organism_df[nchar(organism_df$gbif.phylum) > 0,]
+  wood_saprotroph_df <- fungi_taxon_df[fungi_taxon_df$gbif.genus
                                        %in% wood_saprotroph_traits_df$GENUS, ]
 
   start_col <- which(names(counts_df) == sep_col_name)

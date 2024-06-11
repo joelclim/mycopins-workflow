@@ -1,7 +1,7 @@
 filter_for_fungi <- function(counts_df,
-                             gbif_taxon_df,
+                             organism_df,
                              sep_col_name = "_Splitter_") {
-  fungi_taxon_df <- gbif_taxon_df[nchar(gbif_taxon_df$genus) > 0,]
+  fungi_taxon_df <- organism_df[nchar(organism_df$gbif.genus) > 0,]
 
   start_col <- which(names(counts_df) == sep_col_name)
 
@@ -9,20 +9,23 @@ filter_for_fungi <- function(counts_df,
 
   # For each record, get the value in acceptedNameUsage if exists.
   # Otherwise, use the originalNameUsage.
-  fungi_names <- unique(sort(ifelse(!is.na(fungi_taxon_df$acceptedNameUsage),
-                                    fungi_taxon_df$acceptedNameUsage,
-                                    fungi_taxon_df$originalNameUsage)))
+  fungi_names <- unique(sort(ifelse(!is.na(fungi_taxon_df$gbif.accepted_name_usage),
+                                    fungi_taxon_df$gbif.accepted_name_usage,
+                                    fungi_taxon_df$gbif.original_name_usage)))
 
   # TODO: QC
   # Exclude: fungi with names like "Fungus", "Fungi", or mock
-  fungi_names <- setdiff(fungi_names, c("Fungus", "Fungi", "mock"))
+  fungi_names <- setdiff(fungi_names, c("alga",
+                                        "fungi", "fungus",
+                                        "Fungi", "Fungus",
+                                        "mock", "uncultured organism"))
 
   # TODO: QC
   # Exclude: fungi with bit_score less than 200
-  less_than_200_df <- subset(gbif_taxon_df, searchBitScore < 200)
-  less_than_200_fungi_names <- unique(sort(ifelse(!is.na(less_than_200_df$acceptedNameUsage),
-                                    less_than_200_df$acceptedNameUsage,
-                                    less_than_200_df$originalNameUsage)))
+  less_than_200_df <- subset(organism_df, search.bit_score < 200)
+  less_than_200_fungi_names <- unique(sort(ifelse(!is.na(less_than_200_df$gbif.accepted_name_usage),
+                                    less_than_200_df$gbif.accepted_name_usage,
+                                    less_than_200_df$gbif.original_name_usage)))
 
   fungi_names <- setdiff(fungi_names, less_than_200_fungi_names)
 

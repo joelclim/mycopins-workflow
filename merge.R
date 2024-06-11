@@ -21,22 +21,22 @@ mycopins_merge_config <- function(merge_name,
   merge_community_file <- paste0(merge_directory, "mycopins_community.csv")
   merge_environment_fungi_file <- paste0(merge_directory, "mycopins_environment_fungi.csv")
   merge_community_fungi_file <- paste0(merge_directory, "mycopins_community_fungi.csv")
-  merge_gbif_taxon_file <- paste0(merge_directory, "mycopins_gbif_taxon.csv")
-  merge_gbif_taxon_fungi_file <- paste0(merge_directory, "mycopins_gbif_taxon_fungi.csv")
+  merge_organisms_file <- paste0(merge_directory, "mycopins_organisms.csv")
+  merge_organisms_fungi_file <- paste0(merge_directory, "mycopins_organisms_fungi.csv")
 
   first_directory <- paste0(data_directory, first_name, "/")
   first_environment_file <- paste0(first_directory, "mycopins_environment.csv")
   first_community_file <- paste0(first_directory, "mycopins_community.csv")
   first_environment_fungi_file <- paste0(first_directory, "mycopins_environment_fungi.csv")
   first_community_fungi_file <- paste0(first_directory, "mycopins_community_fungi.csv")
-  first_gbif_taxon_file <- paste0(first_directory, "mycopins_gbif_taxon.csv")
+  first_organisms_file <- paste0(first_directory, "mycopins_organisms.csv")
 
   second_directory <- paste0(data_directory, second_name, "/")
   second_environment_file <- paste0(second_directory, "mycopins_environment.csv")
   second_community_file <- paste0(second_directory, "mycopins_community.csv")
   second_environment_fungi_file <- paste0(second_directory, "mycopins_environment_fungi.csv")
   second_community_fungi_file <- paste0(second_directory, "mycopins_community_fungi.csv")
-  second_gbif_taxon_file <- paste0(second_directory, "mycopins_gbif_taxon.csv")
+  second_organisms_file <- paste0(second_directory, "mycopins_organisms.csv")
 
   return(c(
     merge_directory = merge_directory,
@@ -44,20 +44,20 @@ mycopins_merge_config <- function(merge_name,
     merge_community_file = merge_community_file,
     merge_environment_fungi_file = merge_environment_fungi_file,
     merge_community_fungi_file = merge_community_fungi_file,
-    merge_gbif_taxon_file = merge_gbif_taxon_file,
-    merge_gbif_taxon_fungi_file = merge_gbif_taxon_fungi_file,
+    merge_organisms_file = merge_organisms_file,
+    merge_organisms_fungi_file = merge_organisms_fungi_file,
     first_directory = first_directory,
     first_environment_file = first_environment_file,
     first_community_file = first_community_file,
     first_environment_fungi_file = first_environment_fungi_file,
     first_community_fungi_file = first_community_fungi_file,
-    first_gbif_taxon_file = first_gbif_taxon_file,
+    first_organisms_file = first_organisms_file,
     second_directory = second_directory,
     second_environment_file = second_environment_file,
     second_community_file = second_community_file,
     second_environment_fungi_file = second_environment_fungi_file,
     second_community_fungi_file = second_community_fungi_file,
-    second_gbif_taxon_file = second_gbif_taxon_file
+    second_organisms_file = second_organisms_file
   ))
 }
 
@@ -77,14 +77,14 @@ mycopins_merge <- function(configuration) {
                         configuration["merge_environment_fungi_file"],
                         configuration["merge_community_fungi_file"])
 
-  print("[Merge] GBIF Taxonomy")
-  mycopins_merge_gbif_taxon(configuration["first_gbif_taxon_file"],
-                            configuration["second_gbif_taxon_file"],
-                            configuration["merge_gbif_taxon_file"])
+  print("[Merge] Organisms datasets")
+  mycopins_merge_organisms(configuration["first_organisms_file"],
+                           configuration["second_organisms_file"],
+                           configuration["merge_organisms_file"])
 
-  mycopins_merge_gbif_taxon(configuration["first_gbif_taxon_file"],
-                            configuration["second_gbif_taxon_file"],
-                            configuration["merge_gbif_taxon_fungi_file"], TRUE)
+  mycopins_merge_organisms(configuration["first_organisms_file"],
+                           configuration["second_organisms_file"],
+                           configuration["merge_organisms_fungi_file"], TRUE)
 }
 
 
@@ -108,19 +108,19 @@ mycopins_merge_counts <- function(first_environment_file,
 }
 
 
-mycopins_merge_gbif_taxon <- function(first_gbif_taxon_file,
-                                      second_gbif_taxon_file,
-                                      merge_gbif_taxon_file,
-                                      fungi_only = FALSE) {
+mycopins_merge_organisms <- function(first_organisms_file,
+                                     second_organisms_file,
+                                     merge_organisms_file,
+                                     fungi_only = FALSE) {
   # Merge environments
-  first.gbif_taxon <- read_csv(first_gbif_taxon_file, show_col_types = FALSE)
-  second.gbif_taxon <- read_csv(second_gbif_taxon_file, show_col_types = FALSE)
-  merged.gbif_taxon <- rbind(first.gbif_taxon, second.gbif_taxon)
-  merged.gbif_taxon <- cbind(rowId = rownames(merged.gbif_taxon), merged.gbif_taxon)
+  first.organisms <- read_csv(first_organisms_file, show_col_types = FALSE)
+  second.organisms <- read_csv(second_organisms_file, show_col_types = FALSE)
+  merged.organisms <- rbind(first.organisms, second.organisms)
+  merged.organisms <- cbind(rowId = rownames(merged.organisms), merged.organisms)
 
-  organisms <- unique(merged.gbif_taxon$organism)
+  organisms <- unique(merged.organisms$organism)
   if (fungi_only) {
-    organisms <- unique(subset(merged.gbif_taxon, taxonKey != "KINGDOM")$organism)
+    organisms <- unique(subset(merged.organisms, gbif.taxon_key != "KINGDOM")$organism)
     organisms <- setdiff(organisms, c("alga",
                                       "fungi", "fungus",
                                       "Fungi", "Fungus",
@@ -129,9 +129,9 @@ mycopins_merge_gbif_taxon <- function(first_gbif_taxon_file,
 
   rows_to_keep <- c()
   for (organism_name in organisms) {
-    search_matches <- merged.gbif_taxon %>%
-      filter(organism == organism_name & searchBitScore >= 200) %>%
-      arrange(desc(searchPercentIdentity), searchEValue)
+    search_matches <- merged.organisms %>%
+      filter(organism == organism_name & search.bit_score >= 200) %>%
+      arrange(desc(search.percent_identity), search.evalue)
 
     best_search_match <- NULL
     if (nrow(search_matches) > 0) {
@@ -140,11 +140,11 @@ mycopins_merge_gbif_taxon <- function(first_gbif_taxon_file,
   }
 
   # Keep only best search match rows for each organism
-  merged.gbif_taxon <- subset(merged.gbif_taxon, rowId %in% rows_to_keep)
+  merged.organisms <- subset(merged.organisms, rowId %in% rows_to_keep)
   # Remove rowId column
-  merged.gbif_taxon <- subset(merged.gbif_taxon, select = -rowId)
+  merged.organisms <- subset(merged.organisms, select = -rowId)
   # Sort based on organism
-  merged.gbif_taxon <- merged.gbif_taxon[order(merged.gbif_taxon$organism), ]
+  merged.organisms <- merged.organisms[order(merged.organisms$organism), ]
 
-  write.csv(merged.gbif_taxon, file = merge_gbif_taxon_file, row.names = FALSE)
+  write.csv(merged.organisms, file = merge_organisms_file, row.names = FALSE)
 }
