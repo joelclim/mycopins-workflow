@@ -95,16 +95,26 @@ mycopins_merge_counts <- function(first_environment_file,
                                   merge_environment_file,
                                   merge_community_file) {
   # Merge environments
-  first.env <- read_csv(first_environment_file, show_col_types = FALSE)
-  second.env <- read_csv(second_environment_file, show_col_types = FALSE)
+  first.env <- read_csv(first_environment_file,
+                        show_col_types = FALSE,
+                        locale = locale(encoding = "UTF-8"))
+  second.env <- read_csv(second_environment_file,
+                         show_col_types = FALSE,
+                         locale = locale(encoding = "UTF-8"))
   merged.env <- rbind(first.env, second.env)
-  write.csv(merged.env, file = merge_environment_file, row.names = FALSE)
+  write.csv(merged.env, file = merge_environment_file,
+            row.names = FALSE, fileEncoding = "UTF-8")
 
   # Merge communities
-  first <- read_csv(first_community_file, show_col_types = FALSE)
-  second <- read_csv(second_community_file, show_col_types = FALSE)
+  first <- read_csv(first_community_file,
+                    show_col_types = FALSE,
+                    locale = locale(encoding = "UTF-8"))
+  second <- read_csv(second_community_file,
+                     show_col_types = FALSE,
+                     locale = locale(encoding = "UTF-8"))
   merged <- merge_communities(merged.env, first, second)
-  write.csv(merged, file = merge_community_file, row.names = FALSE)
+  write.csv(merged, file = merge_community_file,
+            row.names = FALSE, fileEncoding = "UTF-8")
 }
 
 
@@ -113,8 +123,12 @@ mycopins_merge_organisms <- function(first_organisms_file,
                                      merge_organisms_file,
                                      fungi_only = FALSE) {
   # Merge environments
-  first.organisms <- read_csv(first_organisms_file, show_col_types = FALSE)
-  second.organisms <- read_csv(second_organisms_file, show_col_types = FALSE)
+  first.organisms <- read_csv(first_organisms_file,
+                              show_col_types = FALSE,
+                              locale = locale(encoding = "UTF-8"))
+  second.organisms <- read_csv(second_organisms_file,
+                               show_col_types = FALSE,
+                               locale = locale(encoding = "UTF-8"))
   merged.organisms <- rbind(first.organisms, second.organisms)
   merged.organisms <- cbind(rowId = rownames(merged.organisms), merged.organisms)
 
@@ -146,5 +160,6 @@ mycopins_merge_organisms <- function(first_organisms_file,
   # Sort based on organism
   merged.organisms <- merged.organisms[order(merged.organisms$organism), ]
 
-  write.csv(merged.organisms, file = merge_organisms_file, row.names = FALSE)
+  write.csv(merged.organisms, file = merge_organisms_file,
+            row.names = FALSE, fileEncoding = "UTF-8")
 }

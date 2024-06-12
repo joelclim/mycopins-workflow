@@ -1,3 +1,7 @@
+if (!require("readr")) install.packages("readr")
+
+library(readr)
+
 clean_counts <- function(scata_counts_file,
                          env_file,
                          dataset_name,

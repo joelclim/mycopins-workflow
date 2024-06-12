@@ -76,10 +76,12 @@ clean_clusters <- function(in_all_clusters_file, out_all_clusters_file) {
   close(out_con)
 
   suppressMessages(
-    df <- read_csv(out_all_clusters_file, show_col_types = FALSE)
+    df <- read_csv(out_all_clusters_file,
+                   show_col_types = FALSE,
+                   locale = locale(encoding = "UTF-8"))
   )
   df <- select(df, -contains("..."))
-  write.csv(df, file = out_all_clusters_file, row.names = FALSE)
+  write.csv(df, file = out_all_clusters_file, row.names = FALSE, fileEncoding = "UTF-8")
 
   return(df)
 }
