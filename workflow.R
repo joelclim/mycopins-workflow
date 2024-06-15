@@ -28,7 +28,7 @@ source(paste0(lib_directory, "filter_for_wood_saprotroph.R"))
 
 
 
-run_workflow <- function(batch_name, scata_dataset_name, scata_job_id) {
+run_workflow <- function(batch_name, scata_dataset_name, scata_job_id, prompt=TRUE) {
   print(paste("[MycoPins Workflow] Batch:", batch_name,
               "; SCATA dataset:", scata_dataset_name,
               "; SCATA job:", scata_job_id))
@@ -38,8 +38,10 @@ run_workflow <- function(batch_name, scata_dataset_name, scata_job_id) {
   mycopins_preprocess(configuration)
 
   mycopins_search(configuration)
-  readline(prompt="Press [Enter] to continue")
-
+  if (prompt) {
+    readline(prompt="Press [Enter] to continue")
+  }
+  
   mycopins_identify(configuration)
   mycopins_annotate(configuration)
 

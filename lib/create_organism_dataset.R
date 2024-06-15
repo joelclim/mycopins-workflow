@@ -9,15 +9,17 @@ create_organism_dataset <- function(organisms, complete_clusters_df, fungal_trai
   create_organism_record <- function(organism, complete_clusters_df, fungal_traits_df) {
     response <- name_backbone_verbose(name=organism, kingdom="fungi")
     taxon <- response$data
+
     if (taxon$matchType == "NONE" | organism == "mock") {
       return(c(
-        search.source = "",
-        search.percent_identity = "",
-        search.evalue = "",
-        search.bit_score = "",
-        search.accession = "",
-        search.tax_id = "",
+        match.source = "",
+        match.percent_identity = "",
+        match.evalue = "",
+        match.bit_score = "",
+        match.accession = "",
+        match.tax_id = "",
         gbif.match_type = taxon$matchType,
+        gbif.usage_key = "",
         gbif.scientific_name = "",
         gbif.accepted_name_usage = "",
         gbif.original_name_usage = "",
@@ -27,7 +29,7 @@ create_organism_dataset <- function(organisms, complete_clusters_df, fungal_trai
         gbif.order = "",
         gbif.family = "",
         gbif.genus = "",
-        gbif.taxon_key = "",
+        gbif.taxon_rank = "",
         gbif.status = "",
         gbif.scientific_name_authorship = "",
         fungal_traits.primary_lifestyle = "",
@@ -52,20 +54,22 @@ create_organism_dataset <- function(organisms, complete_clusters_df, fungal_trai
     }
 
     organism_record <- c(
-      search.source = ifelse(nrow(best_search_match) == 1,
-                            best_search_match$source, ""),
-      search.percent_identity = ifelse(nrow(best_search_match) == 1,
-                                     best_search_match$percent_identity, ""),
-      search.evalue = ifelse(nrow(best_search_match) == 1,
-                            best_search_match$evalue, ""),
-      search.bit_score = ifelse(nrow(best_search_match) == 1,
-                              best_search_match$bit_score, ""),
-      search.accession = ifelse(nrow(best_search_match) == 1,
-                               best_search_match$accession, ""),
-      search.tax_id = ifelse(nrow(best_search_match) == 1,
-                           best_search_match$taxid, ""),
+      match.source = ifelse(nrow(best_search_match) == 1,
+                             best_search_match$source, ""),
+      match.percent_identity = ifelse(nrow(best_search_match) == 1,
+                                      best_search_match$percent_identity, ""),
+      match.evalue = ifelse(nrow(best_search_match) == 1,
+                             best_search_match$evalue, ""),
+      match.bit_score = ifelse(nrow(best_search_match) == 1,
+                               best_search_match$bit_score, ""),
+      match.accession = ifelse(nrow(best_search_match) == 1,
+                                best_search_match$accession, ""),
+      match.tax_id = ifelse(nrow(best_search_match) == 1,
+                             best_search_match$taxid, ""),
       gbif.match_type = ifelse("matchType" %in% names(taxon),
                          taxon$matchType, ""),
+      gbif.usage_key = ifelse("usageKey" %in% names(taxon),
+                         taxon$usageKey, ""),
       gbif.scientific_name = ifelse("scientificName" %in% names(taxon),
                               taxon$scientificName, ""),
       gbif.accepted_name_usage = ifelse("species" %in% names(taxon),
@@ -78,7 +82,7 @@ create_organism_dataset <- function(organisms, complete_clusters_df, fungal_trai
       gbif.order = ifelse("order" %in% names(taxon), taxon$order, ""),
       gbif.family = ifelse("family" %in% names(taxon), taxon$family, ""),
       gbif.genus = ifelse("genus" %in% names(taxon), taxon$genus, ""),
-      gbif.taxon_key = ifelse("rank" %in% names(taxon), taxon$rank, ""),
+      gbif.taxon_rank = ifelse("rank" %in% names(taxon), taxon$rank, ""),
       gbif.status = ifelse("status" %in% names(taxon), taxon$status, ""),
       gbif.scientific_name_authorship = ifelse(
         "scientificName" %in% names(taxon) &
@@ -96,13 +100,14 @@ create_organism_dataset <- function(organisms, complete_clusters_df, fungal_trai
 
   organism_df <- data.frame(organism = organisms)
 
-  search.source <- character(nrow(organism_df))
-  search.percent_identity <- numeric(nrow(organism_df))
-  search.evalue <- numeric(nrow(organism_df))
-  search.bit_score <- numeric(nrow(organism_df))
-  search.accession <- character(nrow(organism_df))
-  search.tax_id <- character(nrow(organism_df))
+  match.source <- character(nrow(organism_df))
+  match.percent_identity <- numeric(nrow(organism_df))
+  match.evalue <- numeric(nrow(organism_df))
+  match.bit_score <- numeric(nrow(organism_df))
+  match.accession <- character(nrow(organism_df))
+  match.tax_id <- character(nrow(organism_df))
   gbif.match_type <- character(nrow(organism_df))
+  gbif.usage_key <- character(nrow(organism_df))
   gbif.scientific_name <- character(nrow(organism_df))
   gbif.accepted_name_usage <- character(nrow(organism_df))
   gbif.original_name_usage <- character(nrow(organism_df))
@@ -112,7 +117,7 @@ create_organism_dataset <- function(organisms, complete_clusters_df, fungal_trai
   gbif.order <- character(nrow(organism_df))
   gbif.family <- character(nrow(organism_df))
   gbif.genus <- character(nrow(organism_df))
-  gbif.taxon_key <- character(nrow(organism_df))
+  gbif.taxon_rank <- character(nrow(organism_df))
   gbif.status <- character(nrow(organism_df))
   gbif.scientific_name_authorship <- character(nrow(organism_df))
   fungal_traits.primary_lifestyle <- character(nrow(organism_df))
@@ -121,13 +126,14 @@ create_organism_dataset <- function(organisms, complete_clusters_df, fungal_trai
   for (i in 1:nrow(organism_df)) {
     taxon <- create_organism_record(organism_df[i, ], complete_clusters_df, fungal_traits_df)
 
-    search.source[i] <- taxon['search.source']
-    search.percent_identity[i] <- taxon['search.percent_identity']
-    search.evalue[i] <- taxon['search.evalue']
-    search.bit_score[i] <- taxon['search.bit_score']
-    search.accession[i] <- taxon['search.accession']
-    search.tax_id[i] <- taxon['search.tax_id']
+    match.source[i] <- taxon['match.source']
+    match.percent_identity[i] <- taxon['match.percent_identity']
+    match.evalue[i] <- taxon['match.evalue']
+    match.bit_score[i] <- taxon['match.bit_score']
+    match.accession[i] <- taxon['match.accession']
+    match.tax_id[i] <- taxon['match.tax_id']
     gbif.match_type[i] <- taxon['gbif.match_type']
+    gbif.usage_key[i] <- taxon['gbif.usage_key']
     gbif.scientific_name[i] <- taxon['gbif.scientific_name']
     gbif.accepted_name_usage[i] <- taxon['gbif.accepted_name_usage']
     gbif.original_name_usage[i] <- taxon['gbif.original_name_usage']
@@ -137,20 +143,21 @@ create_organism_dataset <- function(organisms, complete_clusters_df, fungal_trai
     gbif.order[i] <- taxon['gbif.order']
     gbif.family[i] <- taxon['gbif.family']
     gbif.genus[i] <- taxon['gbif.genus']
-    gbif.taxon_key[i] <- taxon['gbif.taxon_key']
+    gbif.taxon_rank[i] <- taxon['gbif.taxon_rank']
     gbif.status[i] <- taxon['gbif.status']
     gbif.scientific_name_authorship[i] <- taxon['gbif.scientific_name_authorship']
     fungal_traits.primary_lifestyle[i] <- taxon['fungal_traits.primary_lifestyle']
     fungal_traits.secondary_lifestyle[i] <- taxon['fungal_traits.secondary_lifestyle']
   }
 
-  organism_df$search.source <- search.source
-  organism_df$search.percent_identity <- search.percent_identity
-  organism_df$search.evalue <- search.evalue
-  organism_df$search.bit_score <- search.bit_score
-  organism_df$search.accession <- search.accession
-  organism_df$search.tax_id <- search.tax_id
+  organism_df$match.source <- match.source
+  organism_df$match.percent_identity <- match.percent_identity
+  organism_df$match.evalue <- match.evalue
+  organism_df$match.bit_score <- match.bit_score
+  organism_df$match.accession <- match.accession
+  organism_df$match.tax_id <- match.tax_id
   organism_df$gbif.match_type <- gbif.match_type
+  organism_df$gbif.usage_key <- gbif.usage_key
   organism_df$gbif.scientific_name <- gbif.scientific_name
   organism_df$gbif.accepted_name_usage <- gbif.accepted_name_usage
   organism_df$gbif.original_name_usage <- gbif.original_name_usage
@@ -160,7 +167,7 @@ create_organism_dataset <- function(organisms, complete_clusters_df, fungal_trai
   organism_df$gbif.order <- gbif.order
   organism_df$gbif.family <- gbif.family
   organism_df$gbif.genus <- gbif.genus
-  organism_df$gbif.taxon_key <- gbif.taxon_key
+  organism_df$gbif.taxon_rank <- gbif.taxon_rank
   organism_df$gbif.status <- gbif.status
   organism_df$gbif.scientific_name_authorship <- gbif.scientific_name_authorship
   organism_df$fungal_traits.primary_lifestyle <- fungal_traits.primary_lifestyle

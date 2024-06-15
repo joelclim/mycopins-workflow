@@ -1,13 +1,16 @@
 library("rgbif")
 
 organism <- "Aureobasidium pullulans"
+organism <- "Acephala"
+#organism <- "Acephala applanata"
 gbif_match <- name_lookup(query=organism,
                           status="ACCEPTED",
                           origin="SOURCE",
                           hl=FALSE, 
                           limit=1)
-match <- gbif_match$data
-match$key
+taxon <- gbif_match$data
+"key" %in% names(taxon)
+taxon$key
 
 organism <- "Aureobasidium pullulans"
 organism <- "fungus"
@@ -17,9 +20,12 @@ organism <- "Winnie the Pooh"
 organism <- "Collophora"
 organism <- "Spicatispora fennica"
 organism <- "Ceraceomyces tessulatus"
+#organism <- "Acephala"
+organism <- "Acephala applanata"
 result <- name_backbone_verbose(name=organism)
 data <- result$data
 data$matchType
+data$usageKey
 
 # Find the position of the given string
 record <- data.frame(list(

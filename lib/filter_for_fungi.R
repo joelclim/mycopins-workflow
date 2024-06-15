@@ -22,7 +22,7 @@ filter_for_fungi <- function(counts_df,
 
   # TODO: QC
   # Exclude: fungi with bit_score less than 200
-  less_than_200_df <- subset(organism_df, search.bit_score < 200)
+  less_than_200_df <- subset(organism_df, match.bit_score < 200)
   less_than_200_fungi_names <- unique(sort(ifelse(!is.na(less_than_200_df$gbif.accepted_name_usage),
                                     less_than_200_df$gbif.accepted_name_usage,
                                     less_than_200_df$gbif.original_name_usage)))

@@ -134,7 +134,7 @@ mycopins_merge_organisms <- function(first_organisms_file,
 
   organisms <- unique(merged.organisms$organism)
   if (fungi_only) {
-    organisms <- unique(subset(merged.organisms, gbif.taxon_key != "KINGDOM")$organism)
+    organisms <- unique(subset(merged.organisms, gbif.taxon_rank != "KINGDOM")$organism)
     organisms <- setdiff(organisms, c("alga",
                                       "fungi", "fungus",
                                       "Fungi", "Fungus",
@@ -144,8 +144,8 @@ mycopins_merge_organisms <- function(first_organisms_file,
   rows_to_keep <- c()
   for (organism_name in organisms) {
     search_matches <- merged.organisms %>%
-      filter(organism == organism_name & search.bit_score >= 200) %>%
-      arrange(desc(search.percent_identity), search.evalue)
+      filter(organism == organism_name & match.bit_score >= 200) %>%
+      arrange(desc(match.percent_identity), match.evalue)
 
     best_search_match <- NULL
     if (nrow(search_matches) > 0) {
