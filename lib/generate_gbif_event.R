@@ -19,10 +19,9 @@ stateProvince <- "North Ostrobothnia"
 municipality <- "Kuusamo"
 
 transects <- c("A", "C")
-sites <- c("A", "B", "C", "D", "E", "F")
 habitats <- c(
-  "A" = "broadleaf forest ecosystem; outside reindeer exclusion area; wooden pins buried in soil.",
-  "C" = "broadleaf forest ecosystem; biotope spruce forest; wooden pins buried in soil."
+  "A" = "boreal forest area protected from grazing by reindeers; wooden pins buried in soil.",
+  "C" = "mixed broadleaf forest accessed by random visitors; wooden pins buried in soil."
 )
 latitude <- c(
   "A" = 66.367,
@@ -80,25 +79,33 @@ for (i in 1:length(transects)) {
     eventDate <- collection_dates[j]
     print(paste("Transect:", transect, "; Date.Collected:", eventDate))
     
-    date_id <- format(eventDate, "%Y%m%d")
+    date_id <- format(eventDate, "%Y_%b_%d")
     env_record <- mycopins.environment %>%
                   filter(as.Date(Date.Collected, "%m/%d/%Y") == eventDate 
                          & Transect == transect) %>%
                   slice(1)
     if (nrow(env_record) == 1) { # exists
-      parentEventID <- paste0("MycoPins-", location, "-", transect, "-", date_id)
+      parentEventID <- paste0(transect, "_", date_id)
       samplingEffort <- paste(env_record$Days.Elapsed, "days")
       fieldNotes <- env_record$Season
       habitat <- habitats[transect]
       decimalLatitude <- latitude[transect]
       decimalLongitude <- longitude[transect]
       
+      sites <- mycopins.environment %>%
+            filter(as.Date(Date.Collected, "%m/%d/%Y") == eventDate 
+                   & Transect == transect) %>%
+            arrange(Sample.Number) %>%
+            pull(Sample.Number)
+      
       for (k in 1:length(sites)) {
         site <- sites[k]
-        eventID <- paste0(parentEventID, "-", site)
+        eventID <- paste0(transect, "_", site)
         
-        dynamic_properties_df <- data.frame(woodType = get_wood_type(site), 
-                                            woodTexture = get_wood_texture(site))
+        site_letter <- substr(site, nchar(site), nchar(site))
+        
+        dynamic_properties_df <- data.frame(woodType = get_wood_type(site_letter), 
+                                            woodTexture = get_wood_texture(site_letter))
         weather_df <- data.frame(mintemp = env_record$mintemp,
                                  maxtemp = env_record$maxtemp,
                                  avgtemp = env_record$avgtemp,

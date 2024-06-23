@@ -20,10 +20,8 @@ mycopins.organisms <- read_csv(organisms_file, show_col_types = FALSE,
 
 location <- "Oulanka"
 transects <- c("A", "C")
-sites <- c("A", "B", "C", "D", "E", "F")
 basisOfRecord <- "MaterialSample"
 organismQuantityType <- "DNA sequence reads"
-preparations <- "DNA extract from a MycoPin"
 sampleSizeUnit <- "DNA sequence reads"
 
 get_wood_type <- function(site) {
@@ -70,9 +68,9 @@ substrRight <- function(x, n){
   substr(x, nchar(x)-n+1, nchar(x))
 }
 
-create_dynamic_properties <- function(site, organism) {
-  dynamic_properties_df <- data.frame(woodType = get_wood_type(site),
-                                      woodTexture = get_wood_texture(site))
+create_dynamic_properties <- function(site_letter, organism) {
+  dynamic_properties_df <- data.frame(woodType = get_wood_type(site_letter),
+                                      woodTexture = get_wood_texture(site_letter))
   match_df <- data.frame(
     source = get_match_source(organism$match.source),
     percentIdentity = organism$match.percent_identity,
@@ -93,7 +91,7 @@ create_dynamic_properties <- function(site, organism) {
 }
 
 create_occurrence_record <- function(eventID, occurrenceID,
-                                     site, specie, organism, occurrence_match) {
+                                     site_letter, specie, organism, occurrence_match) {
   organismID <- get_organism_id(organism)
   dataGeneralizations <- get_data_generalizations(organism)
 
@@ -107,8 +105,10 @@ create_occurrence_record <- function(eventID, occurrenceID,
     occurrenceStatus <- "present"
   }
 
-  dynamic_properties_df <- create_dynamic_properties(site, organism)
+  dynamic_properties_df <- create_dynamic_properties(site_letter, organism)
 
+  preparations <- paste("DNA extract from a", get_wood_type(site_letter), "MycoPin.")
+  
   occurrence_record <- list(
     occurrenceID = occurrenceID,
     eventID = eventID,
@@ -179,13 +179,21 @@ execution_time <- system.time({
     collection_date_count <- length(collection_dates)
     for (j in 1:collection_date_count) {
       eventDate <- collection_dates[j]
-      date_id <- format(eventDate, "%Y%m%d")
-
+      date_id <- format(eventDate, "%Y_%b_%d")
+      
+      sites <- mycopins.environment %>%
+        filter(as.Date(Date.Collected, "%m/%d/%Y") == eventDate 
+               & Transect == transect) %>%
+        arrange(Sample.Number) %>%
+        pull(Sample.Number)
+      
       site_count <- length(sites)
       for (k in 1:site_count) {
         site <- sites[k]
-        eventID <- paste0("MycoPins-", location, "-", transect, "-", date_id, "-", site)
-
+        eventID <- paste0(transect, "_", site)
+        
+        site_letter <- substr(site, nchar(site), nchar(site))
+        
         species_count <- length(species)
         for (m in 1:species_count) {
           specie <- species[m]
@@ -205,11 +213,11 @@ execution_time <- system.time({
             occurrence_match <- mycopins %>%
               filter(Transect == transect
                      & as.Date(Date.Collected, "%m/%d/%Y") == eventDate
-                     & substrRight(Sample.Number, 1) == site) %>%
+                     & substrRight(Sample.Number, 1) == site_letter) %>%
               slice(1)
 
             occurrence_record <- create_occurrence_record(eventID, occurrenceID,
-                                                          site, specie,
+                                                          site_letter, specie,
                                                           organism, occurrence_match)
             gbif_occurrences <- rbind(gbif_occurrences,
                                       as.data.frame(occurrence_record, stringsAsFactors = FALSE))
