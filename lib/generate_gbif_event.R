@@ -20,8 +20,8 @@ municipality <- "Kuusamo"
 
 transects <- c("A", "C")
 habitats <- c(
-  "A" = "boreal forest area protected from grazing by reindeers; wooden pins buried in soil.",
-  "C" = "mixed broadleaf forest accessed by random visitors; wooden pins buried in soil."
+  "A" = "buried in soil of a boreal forest area protected from grazing by reindeers.",
+  "C" = "buried in soil of a mixed broadleaf forest accessed by random visitors."
 )
 latitude <- c(
   "A" = 66.367,
@@ -88,7 +88,6 @@ for (i in 1:length(transects)) {
       parentEventID <- paste0(transect, "_", date_id)
       samplingEffort <- paste(env_record$Days.Elapsed, "days")
       fieldNotes <- env_record$Season
-      habitat <- habitats[transect]
       decimalLatitude <- latitude[transect]
       decimalLongitude <- longitude[transect]
       
@@ -103,9 +102,12 @@ for (i in 1:length(transects)) {
         eventID <- paste0(transect, "_", site)
         
         site_letter <- substr(site, nchar(site), nchar(site))
+        wood_type <- get_wood_type(site_letter)
+        wood_texture <- get_wood_texture(site_letter)
+        habitat <- paste0(wood_type, "(", wood_texture, ") dowel ", habitats[transect])
         
-        dynamic_properties_df <- data.frame(woodType = get_wood_type(site_letter), 
-                                            woodTexture = get_wood_texture(site_letter))
+        dynamic_properties_df <- data.frame(woodType = wood_type, 
+                                            woodTexture = wood_texture)
         weather_df <- data.frame(mintemp = env_record$mintemp,
                                  maxtemp = env_record$maxtemp,
                                  avgtemp = env_record$avgtemp,

@@ -60,9 +60,22 @@ get_data_generalizations <- function(organism) {
   return("Identified via UNITE Fungi 9.0 (2023-07-18).")
 }
 
-get_organism_id <- function(organism) {
+get_taxon_id <- function(organism) {
   return(paste0("https://www.gbif.org/species/", organism$gbif.usage_key))
 }
+
+get_taxon_concept_id <- function(organism) {
+  if (organism$match.source == "BLAST") {
+    return(paste0("NCBI:tx", organism$match.tax_id))
+  }
+  
+  # UNITE
+  tax_id <- strsplit(organism$match.tax_id, split="\\|")
+  sh_id <- tax_id[[1]][1]
+  seq_dataset <- tax_id[[1]][2]
+  return(paste0("UNITE:", sh_id))
+}
+
 
 substrRight <- function(x, n){
   substr(x, nchar(x)-n+1, nchar(x))
@@ -92,7 +105,8 @@ create_dynamic_properties <- function(site_letter, organism) {
 
 create_occurrence_record <- function(eventID, occurrenceID,
                                      site_letter, specie, organism, occurrence_match) {
-  organismID <- get_organism_id(organism)
+  taxonID <- get_taxon_id(organism)
+  taxonConceptID <- get_taxon_concept_id(organism)
   dataGeneralizations <- get_data_generalizations(organism)
 
   organismQuantity <- 0
@@ -114,7 +128,8 @@ create_occurrence_record <- function(eventID, occurrenceID,
     eventID = eventID,
     basisOfRecord = basisOfRecord,
     dataGeneralizations = dataGeneralizations,
-    organismID = organismID,
+    taxonID = taxonID,
+    taxonConceptID = taxonConceptID,
     organismQuantity = organismQuantity,
     organismQuantityType = organismQuantityType,
     occurrenceStatus = occurrenceStatus,
@@ -143,7 +158,8 @@ gbif_occurrences <- data.frame(
   eventID = character(),
   basisOfRecord = character(),
   dataGeneralizations = character(),
-  organismID = character(),
+  taxonID = character(),
+  taxonConceptID = character(),
   organismQuantity = numeric(),
   organismQuantityType = character(),
   occurrenceStatus = character(),
