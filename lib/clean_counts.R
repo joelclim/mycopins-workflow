@@ -33,19 +33,23 @@ clean_counts <- function(scata_counts_file,
 
   cluster_counts <- ncol(counts) - 2 # Exclude Tag and Sample.Number
 
-  # TODO: Handle if POS or NEG do not exists in counts
-
+  counts.cols_with_pos <- character()
+  if (any(counts$Sample.Number == "POS")) {
   # Remove clusters with positive values greater than minimum count
-  counts.cols_with_pos <- clean_counts.cols_with_control(counts, "POS", minimum_count)
-  counts <- counts[, !(names(counts) %in% counts.cols_with_pos)]
-  counts <- counts[counts$Sample.Number != "POS", ]
-  env_df <- env_df[env_df$Sample.Number != "POS", ]
+    counts.cols_with_pos <- clean_counts.cols_with_control(counts, "POS", minimum_count)
+    counts <- counts[, !(names(counts) %in% counts.cols_with_pos)]
+    counts <- counts[counts$Sample.Number != "POS", ]
+    env_df <- env_df[env_df$Sample.Number != "POS", ]
+  }
 
-  # Remove clusters with negative values greater than minimum count
-  counts.cols_with_neg <- clean_counts.cols_with_control(counts, "NEG", minimum_count)
-  counts <- counts[, !(names(counts) %in% counts.cols_with_neg)]
-  counts <- counts[counts$Sample.Number != "NEG", ]
-  env_df <- env_df[env_df$Sample.Number != "NEG", ]
+  counts.cols_with_neg <- character()
+  if (any(counts$Sample.Number == "NEG")) {
+    # Remove clusters with negative values greater than minimum count
+    counts.cols_with_neg <- clean_counts.cols_with_control(counts, "NEG", minimum_count)
+    counts <- counts[, !(names(counts) %in% counts.cols_with_neg)]
+    counts <- counts[counts$Sample.Number != "NEG", ]
+    env_df <- env_df[env_df$Sample.Number != "NEG", ]
+  }
 
   # Take the community data from counts
   community_df <- counts[, !(names(counts) %in% c("Tag", "Sample.Number")) ]

@@ -39,10 +39,15 @@ apply_top_match_to_clusters <- function(top_match_df, cleaned_clusters_df) {
 
   # Determine the whether SCATA or BLAST classified the cluster
   sources <- apply(merge_df, 1, function(row) {
-    if (!is.na(row["sciname"])) {
-      return("BLAST")
+    if (row["normalized_name"] == 'No hits found') {
+      return("No hits found")
     }
-    return("UNITE")
+
+    if (is.na(row["sciname"])) {
+      return("UNITE")
+    }
+
+    return("BLAST")
   })
   merge_df$source <- sources
 
@@ -84,10 +89,36 @@ apply_top_match_to_clusters <- function(top_match_df, cleaned_clusters_df) {
   merge_df[["evalue"]][is.na(merge_df[["evalue"]])] <- 0
 
   # Bit-Score of Reference identified by SCATA is 999.
-  merge_df[["bit_score"]][is.na(merge_df[["bit_score"]])] <- 999
+  bit_score <- apply(merge_df, 1, function(row) {
+    if (row["normalized_name"] == 'No hits found') {
+      return(0)
+    }
+
+    # UNITE
+    if (is.na(row["sciname"])) {
+      return(999)
+    }
+
+    # BLAST
+    return(row["bit_score"])
+  })
+  merge_df$bit_score <- bit_score
 
   # Percent Identity of Reference identified by SCATA is 100%
-  merge_df[["percent_identity"]][is.na(merge_df[["percent_identity"]])] <- 100
+  percent_identity <- apply(merge_df, 1, function(row) {
+    if (row["normalized_name"] == 'No hits found') {
+      return(0)
+    }
+
+    # UNITE
+    if (is.na(row["sciname"])) {
+      return(100)
+    }
+
+    # BLAST
+    return(row["percent_identity"])
+  })
+  merge_df$percent_identity <- percent_identity
 
   # Restore the "Cluster ID" column name
   names(merge_df)[names(merge_df) == "cluster_id"] <- "Cluster.ID"

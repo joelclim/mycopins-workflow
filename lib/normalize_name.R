@@ -1,6 +1,11 @@
 normalize_name <- function(name) {
   new_name <- name
 
+  # No match found in UNITE. No BLASTn hits.
+  if(is.na(new_name)) {
+    return (paste0("No hits found"))
+  }
+
   # ignores
   if (new_name %in% c("uncultured organism")) {
     return(new_name)
