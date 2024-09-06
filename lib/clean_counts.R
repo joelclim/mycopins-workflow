@@ -31,17 +31,25 @@ clean_counts <- function(scata_counts_file,
   counts <- counts[counts$Tag %in% shared_tags, ]
   counts$Sample.Number <- env_df$Sample.Number
 
+  # Calculate row sums for cluster count columns
+  # Exclude Tag and Sample.Number
+  counts$row_sum <- rowSums(counts[, !(names(counts) %in% c("Tag", "Sample.Number"))])
+  counts.tags_with_zero_counts <- counts[counts$row_sum == 0, "Tag"]
+  counts <- counts[, !(names(counts) %in% c("row_sum"))] # restore counts
+
   cluster_counts <- ncol(counts) - 2 # Exclude Tag and Sample.Number
 
+  # POS row exists?
   counts.cols_with_pos <- character()
   if (any(counts$Sample.Number == "POS")) {
-  # Remove clusters with positive values greater than minimum count
+    # Remove clusters with positive values greater than minimum count
     counts.cols_with_pos <- clean_counts.cols_with_control(counts, "POS", minimum_count)
     counts <- counts[, !(names(counts) %in% counts.cols_with_pos)]
     counts <- counts[counts$Sample.Number != "POS", ]
     env_df <- env_df[env_df$Sample.Number != "POS", ]
   }
 
+  # NEG row exists?
   counts.cols_with_neg <- character()
   if (any(counts$Sample.Number == "NEG")) {
     # Remove clusters with negative values greater than minimum count
@@ -66,19 +74,26 @@ clean_counts <- function(scata_counts_file,
     paste0("[B] Number of counts tags: ", length(counts.tags)),
     paste0("[C] Number of env tags not in counts: ", length(env.tags_not_in_counts)),
     paste0("[D] Number of counts tags not in env: ", length(counts.tags_not_in_env)),
-    paste0("[E] Number of clusters: ", cluster_counts),
-    paste0("[F] Number of clusters with pos control: ", length(counts.cols_with_pos)),
-    paste0("[G] Number of clusters with neg control: ", length(counts.cols_with_neg)),
-    paste0("[H] Number of clusters with total counts less than ",
+    paste0("[E] Number of tags with zero cluster counts: ", length(counts.tags_with_zero_counts)),
+    paste0("[F] Number of clusters: ", cluster_counts),
+    paste0("[G] Number of clusters with pos control: ", length(counts.cols_with_pos)),
+    paste0("[H] Number of clusters with neg control: ", length(counts.cols_with_neg)),
+    paste0("[I] Number of clusters with total counts less than ",
            minimum_count, ": ", length(small_clusters)),
     paste(rep("=", 80), collapse = ""),
-    "Tags in env not in counts. Removed from final env tags.",
+    "Tags in env not in counts.",
     ifelse(0 == length(env.tags_not_in_counts), "None",
-                                                paste(env.tags_not_in_counts, collapse = ", ")),
+            paste0("[ACTION REQUIRED] Please remove the following tags from env:",
+                   paste(env.tags_not_in_counts, collapse = ", "))),
     paste(rep("=", 80), collapse = ""),
     "Tags in counts not in env. Excluded in final env tags.",
     ifelse(0 == length(counts.tags_not_in_env), "None",
                                                 paste(counts.tags_not_in_env, collapse = ", ")),
+    paste(rep("=", 80), collapse = ""),
+    "Tags with zero counts. Please remove from final env tags.",
+    ifelse(0 == length(counts.tags_with_zero_counts), "None",
+          paste0("[ACTION REQUIRED] Please remove the following tags from env:",
+                 paste(counts.tags_with_zero_counts, collapse = ", "))),
     paste(rep("=", 80), collapse = ""),
     "Clusters with POS control",
     ifelse(0 == length(counts.cols_with_pos), "None",

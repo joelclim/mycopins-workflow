@@ -36,12 +36,15 @@ run_workflow <- function(batch_name, scata_dataset_name, scata_job_id, prompt=TR
   configuration <- mycopins_config(batch_name, scata_dataset_name, scata_job_id)
 
   mycopins_preprocess(configuration)
+  if (prompt) {
+    readline(prompt="Press [Enter] to continue")
+  }
 
   mycopins_search(configuration)
   if (prompt) {
     readline(prompt="Press [Enter] to continue")
   }
-  
+
   mycopins_identify(configuration)
   mycopins_annotate(configuration)
 
@@ -154,6 +157,10 @@ mycopins_preprocess <- function(configuration) {
   cleaned_clusters_df <- clean_clusters(scata_clusters_file, cleaned_clusters_file)
 
   print("[Pre-process] Complete!")
+  print(paste("[Pre-process] Complete!",
+              "Please check 'cleaned_counts_qc.txt' for any ACTION REQUIRED.",
+              "DO NOT PROCEED UNTIL ACTION REQUIRED ITEMS ARE RESOLVED."))
+
 }
 
 

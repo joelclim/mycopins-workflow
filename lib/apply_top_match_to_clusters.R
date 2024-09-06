@@ -95,7 +95,7 @@ apply_top_match_to_clusters <- function(top_match_df, cleaned_clusters_df) {
     }
 
     # UNITE
-    if (is.na(row["sciname"])) {
+    if (row["source"] == 'UNITE') {
       return(999)
     }
 
@@ -111,7 +111,7 @@ apply_top_match_to_clusters <- function(top_match_df, cleaned_clusters_df) {
     }
 
     # UNITE
-    if (is.na(row["sciname"])) {
+    if (row["source"] == 'UNITE') {
       return(100)
     }
 
