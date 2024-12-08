@@ -26,6 +26,7 @@ apply_match_to_counts <- function(counts_df,
   weather_data <- NULL
   for (i in 1:nrow(counts_df)) {
     counts_row <- counts_df[i,]
+    
     collection_date <- as.Date(counts_row$Date.Collected, "%m/%d/%Y")
     weather_record <- get_weather_data(weather_df, collection_date)
     weather_data <- rbind(weather_data, weather_record)

@@ -1,0 +1,28 @@
+<mxfile host="65bd71144e">
+    <diagram id="TEvpP-wZPyq22VANaI1T" name="Page-1">
+        <mxGraphModel dx="568" dy="435" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="2" value="" style="shape=image;verticalLabelPosition=bottom;labelBackgroundColor=default;verticalAlign=top;aspect=fixed;imageAspect=0;image=data:image/png,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;" vertex="1" parent="1">
+                    <mxGeometry y="180" width="195.6" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" value="Preprocess" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="200" y="290" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="5" value="Search" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="320" y="380" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="7" value="Identify" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="440" y="475" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="8" value="Annotate" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="560" y="570" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="9" value="" style="shape=document;whiteSpace=wrap;html=1;boundedLbl=1;" vertex="1" parent="1">
+                    <mxGeometry x="37.8" y="290" width="120" height="80" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

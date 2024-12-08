@@ -56,6 +56,59 @@ run_workflow <- function(batch_name, scata_dataset_name, scata_job_id, prompt=TR
   print("[MycoPins Workflow] Complete!")
 }
 
+run_workflow2 <- function(batch_name, scata_dataset_name, scata_job_id, prompt=TRUE) {
+  print(paste("[MycoPins Workflow] Batch:", batch_name,
+              "; SCATA dataset:", scata_dataset_name,
+              "; SCATA job:", scata_job_id))
+  
+  configuration <- mycopins_config(batch_name, scata_dataset_name, scata_job_id)
+  
+  mycopins_search(configuration)
+  if (prompt) {
+    readline(prompt="Press [Enter] to continue")
+  }
+  
+  mycopins_identify(configuration)
+  mycopins_annotate(configuration)
+
+  get_fungal_traits_of_organisms(configuration)
+
+  get_fungi_only_counts(configuration)
+  get_wood_saprotrophs_fungi_counts(configuration)
+  
+  print("[MycoPins Workflow] Complete!")
+}
+
+
+run_workflow <- function(batch_name, scata_dataset_name, scata_job_id, prompt=TRUE) {
+  print(paste("[MycoPins Workflow] Batch:", batch_name,
+              "; SCATA dataset:", scata_dataset_name,
+              "; SCATA job:", scata_job_id))
+
+  configuration <- mycopins_config(batch_name, scata_dataset_name, scata_job_id)
+
+  mycopins_preprocess(configuration)
+  if (prompt) {
+    readline(prompt="Press [Enter] to continue")
+  }
+
+  mycopins_search(configuration)
+  if (prompt) {
+    readline(prompt="Press [Enter] to continue")
+  }
+
+  mycopins_identify(configuration)
+  mycopins_annotate(configuration)
+
+  get_fungal_traits_of_organisms(configuration)
+
+  get_fungi_only_counts(configuration)
+  get_wood_saprotrophs_fungi_counts(configuration)
+
+  print("[MycoPins Workflow] Complete!")
+}
+
+
 
 mycopins_config <- function(batch_name, scata_dataset_name, scata_job_id) {
   reference_data_directory <- "./reference-data/"
@@ -223,7 +276,8 @@ mycopins_annotate <- function(configuration) {
   weather_df <- read_csv(weather_file,
                          show_col_types = FALSE,
                          locale = locale(encoding = "UTF-8"))
-
+  weather_df$date <- as.Date(weather_df$date, "%m/%d/%Y")
+  
   complete_clusters_file = configuration["complete_clusters_file"]
   complete_counts_file = configuration["complete_counts_file"]
   mycopins_environment_file = configuration["mycopins_environment_file"]

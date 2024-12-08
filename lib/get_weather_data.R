@@ -13,7 +13,7 @@ library(jsonlite)
 consolidate_weatherstack_results <- function(transect) {
   weather <- data.frame(
     transect = character(),
-    date = character(),
+    date = date(),
     mintemp = numeric(),
     maxtemp = numeric(),
     totalsnow = numeric(),
