@@ -18,6 +18,9 @@ source(paste0(lib_directory, "apply_top_match_to_clusters.R"))
 source(paste0(lib_directory, "get_weather_data.R"))
 source(paste0(lib_directory, "apply_match_to_counts.R"))
 
+# For GBIF DNA-derived dataset
+source(paste0(lib_directory, "create_tag_sequence_dataset.R"))
+
 # Taxonomy and Traits
 source(paste0(lib_directory, "create_organism_dataset.R"))
 source(paste0(lib_directory, "get_fungal_traits.R"))
@@ -60,14 +63,14 @@ run_workflow2 <- function(batch_name, scata_dataset_name, scata_job_id, prompt=T
   print(paste("[MycoPins Workflow] Batch:", batch_name,
               "; SCATA dataset:", scata_dataset_name,
               "; SCATA job:", scata_job_id))
-  
+
   configuration <- mycopins_config(batch_name, scata_dataset_name, scata_job_id)
-  
+
   mycopins_search(configuration)
   if (prompt) {
     readline(prompt="Press [Enter] to continue")
   }
-  
+
   mycopins_identify(configuration)
   mycopins_annotate(configuration)
 
@@ -75,7 +78,7 @@ run_workflow2 <- function(batch_name, scata_dataset_name, scata_job_id, prompt=T
 
   get_fungi_only_counts(configuration)
   get_wood_saprotrophs_fungi_counts(configuration)
-  
+
   print("[MycoPins Workflow] Complete!")
 }
 
@@ -140,6 +143,7 @@ mycopins_config <- function(batch_name, scata_dataset_name, scata_job_id) {
   complete_counts_file <- paste0(batch_directory, "complete_counts.csv")
   mycopins_environment_file <- paste0(batch_directory, "mycopins_environment.csv")
   mycopins_community_file <- paste0(batch_directory, "mycopins_community.csv")
+  mycopins_tag_sequence_file <- paste0(batch_directory, "mycopins_tag_sequence.csv")
   mycopins_organisms_file <- paste0(batch_directory, "mycopins_organisms.csv")
   genus_traits_file <- paste0(batch_directory, "mycopins_genus_traits.csv")
 
@@ -173,6 +177,7 @@ mycopins_config <- function(batch_name, scata_dataset_name, scata_job_id) {
     complete_counts_file = complete_counts_file,
     mycopins_environment_file = mycopins_environment_file,
     mycopins_community_file = mycopins_community_file,
+    mycopins_tag_sequence_file = mycopins_tag_sequence_file,
     mycopins_organisms_file = mycopins_organisms_file,
     genus_traits_file = genus_traits_file,
     fungal_traits_file = fungal_traits_file,
@@ -209,11 +214,9 @@ mycopins_preprocess <- function(configuration) {
   print("[Pre-process] Clean clusters dataset")
   cleaned_clusters_df <- clean_clusters(scata_clusters_file, cleaned_clusters_file)
 
-  print("[Pre-process] Complete!")
   print(paste("[Pre-process] Complete!",
               "Please check 'cleaned_counts_qc.txt' for any ACTION REQUIRED.",
               "DO NOT PROCEED UNTIL ACTION REQUIRED ITEMS ARE RESOLVED."))
-
 }
 
 
@@ -277,11 +280,12 @@ mycopins_annotate <- function(configuration) {
                          show_col_types = FALSE,
                          locale = locale(encoding = "UTF-8"))
   weather_df$date <- as.Date(weather_df$date, "%m/%d/%Y")
-  
+
   complete_clusters_file = configuration["complete_clusters_file"]
   complete_counts_file = configuration["complete_counts_file"]
   mycopins_environment_file = configuration["mycopins_environment_file"]
   mycopins_community_file = configuration["mycopins_community_file"]
+  mycopins_tag_sequence_file = configuration["mycopins_tag_sequence_file"]
 
   # Apply top match to clusters
   print("[Annotate] Apply top match species to clusters")
@@ -317,6 +321,13 @@ mycopins_annotate <- function(configuration) {
   mycopins_organisms_df <- create_organism_dataset(organisms, complete_clusters_df, fungal_traits_df)
   write.csv(mycopins_organisms_df, file = mycopins_organisms_file,
             row.names = FALSE, fileEncoding = "UTF-8")
+
+  # Create tag-sequence dataset
+  print("[Annotate] Create tag-sequence dataset")
+  tag_sequence_df <- create_tag_sequence_dataset(cleaned_counts_df, complete_clusters_df, mycopins_organisms_df)
+  write.csv(tag_sequence_df, file = mycopins_tag_sequence_file,
+            row.names = FALSE, na = "", fileEncoding = "UTF-8")
+
 
   print("[Annotate] Complete!")
 }

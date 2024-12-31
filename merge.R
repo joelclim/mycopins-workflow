@@ -21,6 +21,7 @@ mycopins_merge_config <- function(merge_name,
   merge_community_file <- paste0(merge_directory, "mycopins_community.csv")
   merge_environment_fungi_file <- paste0(merge_directory, "mycopins_environment_fungi.csv")
   merge_community_fungi_file <- paste0(merge_directory, "mycopins_community_fungi.csv")
+  merge_tag_sequence_file <- paste0(merge_directory, "mycopins_tag_sequence.csv")
   merge_organisms_file <- paste0(merge_directory, "mycopins_organisms.csv")
   merge_organisms_fungi_file <- paste0(merge_directory, "mycopins_organisms_fungi.csv")
 
@@ -29,6 +30,7 @@ mycopins_merge_config <- function(merge_name,
   first_community_file <- paste0(first_directory, "mycopins_community.csv")
   first_environment_fungi_file <- paste0(first_directory, "mycopins_environment_fungi.csv")
   first_community_fungi_file <- paste0(first_directory, "mycopins_community_fungi.csv")
+  first_tag_sequence_file <- paste0(first_directory, "mycopins_tag_sequence.csv")
   first_organisms_file <- paste0(first_directory, "mycopins_organisms.csv")
 
   second_directory <- paste0(data_directory, second_name, "/")
@@ -36,6 +38,7 @@ mycopins_merge_config <- function(merge_name,
   second_community_file <- paste0(second_directory, "mycopins_community.csv")
   second_environment_fungi_file <- paste0(second_directory, "mycopins_environment_fungi.csv")
   second_community_fungi_file <- paste0(second_directory, "mycopins_community_fungi.csv")
+  second_tag_sequence_file <- paste0(second_directory, "mycopins_tag_sequence.csv")
   second_organisms_file <- paste0(second_directory, "mycopins_organisms.csv")
 
   return(c(
@@ -44,6 +47,7 @@ mycopins_merge_config <- function(merge_name,
     merge_community_file = merge_community_file,
     merge_environment_fungi_file = merge_environment_fungi_file,
     merge_community_fungi_file = merge_community_fungi_file,
+    merge_tag_sequence_file = merge_tag_sequence_file,
     merge_organisms_file = merge_organisms_file,
     merge_organisms_fungi_file = merge_organisms_fungi_file,
     first_directory = first_directory,
@@ -51,12 +55,14 @@ mycopins_merge_config <- function(merge_name,
     first_community_file = first_community_file,
     first_environment_fungi_file = first_environment_fungi_file,
     first_community_fungi_file = first_community_fungi_file,
+    first_tag_sequence_file = first_tag_sequence_file,
     first_organisms_file = first_organisms_file,
     second_directory = second_directory,
     second_environment_file = second_environment_file,
     second_community_file = second_community_file,
     second_environment_fungi_file = second_environment_fungi_file,
     second_community_fungi_file = second_community_fungi_file,
+    second_tag_sequence_file = second_tag_sequence_file,
     second_organisms_file = second_organisms_file
   ))
 }
@@ -85,6 +91,12 @@ mycopins_merge <- function(configuration) {
   mycopins_merge_organisms(configuration["first_organisms_file"],
                            configuration["second_organisms_file"],
                            configuration["merge_organisms_fungi_file"], TRUE)
+
+  print("[Merge] Tag-Sequence datasets")
+  mycopins_merge_tag_sequence(configuration["first_tag_sequence_file"],
+                           configuration["second_tag_sequence_file"],
+                           configuration["merge_tag_sequence_file"])
+
 }
 
 
@@ -161,5 +173,24 @@ mycopins_merge_organisms <- function(first_organisms_file,
   merged.organisms <- merged.organisms[order(merged.organisms$organism), ]
 
   write.csv(merged.organisms, file = merge_organisms_file,
+            row.names = FALSE, fileEncoding = "UTF-8")
+}
+
+
+mycopins_merge_tag_sequence <- function(first_tag_sequence_file,
+                                        second_tag_sequence_file,
+                                        merge_tag_sequence_file) {
+  first.tag_sequence <- read_csv(first_tag_sequence_file,
+                              show_col_types = FALSE,
+                              locale = locale(encoding = "UTF-8"))
+  second.tag_sequence <- read_csv(second_tag_sequence_file,
+                               show_col_types = FALSE,
+                               locale = locale(encoding = "UTF-8"))
+  merged.tag_sequence <- rbind(first.tag_sequence, second.tag_sequence)
+
+  merged.tag_sequence$Sequence2[is.na(merged.tag_sequence$Sequence2)] <- ""
+  merged.tag_sequence$Sequence3[is.na(merged.tag_sequence$Sequence3)] <- ""
+
+  write.csv(merged.tag_sequence, file = merge_tag_sequence_file,
             row.names = FALSE, fileEncoding = "UTF-8")
 }
