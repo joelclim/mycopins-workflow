@@ -15,7 +15,8 @@ get_transects <- function() {
 
 get_habitat <- function(transect) {
   habitats <- c(
-    "A" = "buried in soil of a boreal forest area protected from grazing by reindeers.",
+    "A" = "buried in soil of a conifer forest area with reindeer access.",
+    "B" = "buried in soil of a conifer forest area protected from grazing by reindeers.",
     "C" = "buried in soil of a mixed broadleaf forest accessed by random visitors."
   )
 
@@ -25,6 +26,7 @@ get_habitat <- function(transect) {
 get_latitude <- function(transect) {
   latitudes <- c(
     "A" = 66.367,
+    "B" = 66.367, # A and B have the same coordinates
     "C" = 66.376
   )
 
@@ -34,6 +36,7 @@ get_latitude <- function(transect) {
 get_longitude <- function(transect) {
   longitudes <- c(
     "A" = 29.533,
+    "B" = 29.533, # A and B have the same coordinates
     "C" = 29.313
   )
 
@@ -100,6 +103,17 @@ mycopins_ipt_gbif_config <- function() {
   organismQuantityType <- "DNA sequence reads"
   sampleSizeUnit <- "DNA sequence reads"
 
+  # DNA-derived
+  # https://rs.gbif.org/extension/gbif/1.0/dna_derived_data_2024-04-17.xml#DNA_sequence
+  libLayout <- "paired"
+  targetGene <- "ITS"
+  targetSubfragment <- "ITS2"
+  seqMethod <- "Illumina MiSeq"
+  otuDB <- "Reference database (\"Clustering based on the UNITE Fungi 9.0 (2023-07-18) using USearch with 90% identity match (SCATA)\")."
+  pcrPrimerNameFormward <- "fITS7"
+  pcrPrimerNameReverse <- "ITS4"
+  pcrPrimerReference <- "Clemmensen, K.E., Ihmark, K., Durling, M.B., Lindahl, B.D.(2016). Sample Preparation for Fungal Community Analysis by High-Throughput Sequencing of Barcode Amplicons. Methods in Molecular Biology 61‑88. https://doi.org/10.1007/978-1-4939-3369-3_4"
+
   return(c(
     ipt_gbif_output_directory = ipt_gbif_output_directory,
     ipt_gbif_event_file = ipt_gbif_event_file,
@@ -121,26 +135,35 @@ mycopins_ipt_gbif_config <- function() {
     # Occurrence
     basisOfRecord = basisOfRecord,
     organismQuantityType = organismQuantityType,
-    sampleSizeUnit = sampleSizeUnit
+    sampleSizeUnit = sampleSizeUnit,
+    # DNA-derived data
+    libLayout = libLayout,
+    targetGene = targetGene,
+    targetSubfragment = targetSubfragment,
+    seqMethod = seqMethod,
+    otuDB = otuDB,
+    pcrPrimerNameFormward = pcrPrimerNameFormward,
+    pcrPrimerNameReverse = pcrPrimerNameReverse,
+    pcrPrimerReference = pcrPrimerReference
   ))
 }
 
 
 mycopins_ipt_gbif_generate <- function(configuration) {
-  #
-  # event
-  #
-  gbif_event <- generate_gbif_event(configuration)
-  write.csv(gbif_event, configuration["ipt_gbif_event_file"],
-      row.names = FALSE, na = "", fileEncoding = "UTF-8")
+  # #
+  # # event
+  # #
+  # gbif_event <- generate_gbif_event(configuration)
+  # write.csv(gbif_event, configuration["ipt_gbif_event_file"],
+  #     row.names = FALSE, na = "", fileEncoding = "UTF-8")
 
 
-  #
-  # occurrence
-  #
-  gbif_occurrence <- generate_gbif_occurrence(configuration)
-  write.csv(gbif_occurrence, configuration["ipt_gbif_occurrence_file"],
-          row.names = FALSE, na = "", fileEncoding = "UTF-8")
+  # #
+  # # occurrence
+  # #
+  # gbif_occurrence <- generate_gbif_occurrence(configuration)
+  # write.csv(gbif_occurrence, configuration["ipt_gbif_occurrence_file"],
+  #         row.names = FALSE, na = "", fileEncoding = "UTF-8")
 
 
   #

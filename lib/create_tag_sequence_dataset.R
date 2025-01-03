@@ -22,13 +22,14 @@ create_tag_sequence_dataset <- function(cleaned_counts_df, complete_clusters_df,
 
   tag_sequence_with_gbif_taxon_id_df <- tag_sequence_df %>%
     inner_join(mycopins_organisms_df, by = c("gbif_accepted_name"="organism")) %>%
-    select(Transect, Sample.Number,     # clean_counts_df
+    select(Transect, Sample.Number,                   # clean_counts_df
       Cluster.ID, Count,
       Forward.Primer, Reverse.Primer,
       Sequence1, Sequence2, Sequence3,
-      taxid, gbif_accepted_name,        # complete_clusters_df
-      gbif.usage_key                    # mycopins_organisms_df
+      taxid, gbif_accepted_name,                      # complete_clusters_df
+      match.source, match.tax_id, gbif.usage_key      # mycopins_organisms_df
     )
 
-  return(tag_sequence_with_gbif_taxon_id_df)
+  return(tag_sequence_with_gbif_taxon_id_df %>%
+    filter(!is.na(match.source)))
 }
