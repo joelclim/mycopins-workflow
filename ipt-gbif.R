@@ -91,7 +91,7 @@ mycopins_ipt_gbif_config <- function() {
   location <- "Oulanka"
 
   # Event
-  samplingProtocol <- "Shumskaya, M., Lorusso, N., Patel, U., Leigh, M., Somervuo, P., & Schigel, D. (2023). MycoPins: a metabarcoding-based method to monitor fungal colonization of fine woody debris. MycoKeys, 96, 77–95. https://doi.org/10.3897/mycokeys.96.101033"
+  samplingProtocol <- "https://doi.org/10.3897/mycokeys.96.101033"
   locationID <- "https://www.geonames.org/12226273"
   countryCode <- "FI"
   country <- "Finland"
@@ -109,10 +109,10 @@ mycopins_ipt_gbif_config <- function() {
   targetGene <- "ITS"
   targetSubfragment <- "ITS2"
   seqMethod <- "Illumina MiSeq"
-  otuDB <- "Reference database (\"Clustering based on the UNITE Fungi 9.0 (2023-07-18) using USearch with 90% identity match (SCATA)\")."
+  otuDB <- "Clustering based on the UNITE Fungi 9.0 (2023-07-18) using USearch with 90% identity parameter (SCATA)"
   pcrPrimerNameFormward <- "fITS7"
   pcrPrimerNameReverse <- "ITS4"
-  pcrPrimerReference <- "Clemmensen, K.E., Ihmark, K., Durling, M.B., Lindahl, B.D.(2016). Sample Preparation for Fungal Community Analysis by High-Throughput Sequencing of Barcode Amplicons. Methods in Molecular Biology 61‑88. https://doi.org/10.1007/978-1-4939-3369-3_4"
+  pcrPrimerReference <- "https://doi.org/10.1007/978-1-4939-3369-3_4"
 
   return(c(
     ipt_gbif_output_directory = ipt_gbif_output_directory,
@@ -150,20 +150,20 @@ mycopins_ipt_gbif_config <- function() {
 
 
 mycopins_ipt_gbif_generate <- function(configuration) {
-  # #
-  # # event
-  # #
-  # gbif_event <- generate_gbif_event(configuration)
-  # write.csv(gbif_event, configuration["ipt_gbif_event_file"],
-  #     row.names = FALSE, na = "", fileEncoding = "UTF-8")
+  #
+  # event
+  #
+  gbif_event <- generate_gbif_event(configuration)
+  write.csv(gbif_event, configuration["ipt_gbif_event_file"],
+      row.names = FALSE, na = "", fileEncoding = "UTF-8")
 
 
-  # #
-  # # occurrence
-  # #
-  # gbif_occurrence <- generate_gbif_occurrence(configuration)
-  # write.csv(gbif_occurrence, configuration["ipt_gbif_occurrence_file"],
-  #         row.names = FALSE, na = "", fileEncoding = "UTF-8")
+  #
+  # occurrence
+  #
+  gbif_occurrence <- generate_gbif_occurrence(configuration)
+  write.csv(gbif_occurrence, configuration["ipt_gbif_occurrence_file"],
+          row.names = FALSE, na = "", fileEncoding = "UTF-8")
 
 
   #
