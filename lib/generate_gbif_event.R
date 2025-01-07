@@ -82,7 +82,7 @@ generate_gbif_event <- function(configuration) {
       env_record <- mycopins.environment %>%
         filter(as.Date(Date.Collected, "%m/%d/%Y") == eventDate
               & Transect == transect) %>%
-        slice(1)
+        dplyr::slice(1)
       if (nrow(env_record) == 1) { # exists
         parentEventID <- paste0(transect, "_", date_id)
         samplingEffort <- paste(env_record$Days.Elapsed, "days")

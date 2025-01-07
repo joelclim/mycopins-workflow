@@ -64,7 +64,7 @@ consolidate_weatherstack_results <- function(transect) {
 get_weather_data <- function(weather_df, collection_date) {
   main_record <- weather_df %>%
     filter(date == collection_date) %>%
-    slice(1) %>%
+    dplyr::slice(1) %>%
     select(mintemp, maxtemp, avgtemp, totalsnow, sunhour, uv_index)
 
   summary_record <- weather_df %>%

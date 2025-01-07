@@ -201,8 +201,8 @@ generate_gbif_occurrence <- function(configuration) {
                         "); Species(", m, "/", species_count, ")"))
 
             organism <- mycopins.organisms %>%
-              filter(organism == specie) %>%
-              slice(1)
+              filter(organism == specie & gbif.kingdom == 'Fungi') %>%
+              dplyr::slice(1)
 
             if (nrow(organism) == 1) { # exists
               occurrenceID <- paste0(eventID, ":", organism$gbif.usage_key)
@@ -211,7 +211,7 @@ generate_gbif_occurrence <- function(configuration) {
                 filter(Transect == transect
                       & as.Date(Date.Collected, "%m/%d/%Y") == eventDate
                       & substrRight(Sample.Number, 1) == site_letter) %>%
-                slice(1)
+                dplyr::slice(1)
 
               occurrence_record <- create_gbif_occurrence_record(eventID, occurrenceID,
                                                             basisOfRecord, organismQuantityType, sampleSizeUnit,

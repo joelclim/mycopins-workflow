@@ -42,31 +42,31 @@ scata_dataset_name <- "SU24-transectA-2"
 scata_job_id <- "scata6541"
 run_workflow(batch_name, scata_dataset_name, scata_job_id, prompt=FALSE)
 
-# batch_name <- "FA24-transectB-1"
-# scata_dataset_name <- "FA24-transectB-1"
-# scata_job_id <- "scata6693"
-# run_workflow(batch_name, scata_dataset_name, scata_job_id, prompt=FALSE)
-# 
-# batch_name <- "FA24-transectB-2"
-# scata_dataset_name <- "FA24-transectB-2"
-# scata_job_id <- "scata6694"
-# run_workflow(batch_name, scata_dataset_name, scata_job_id, prompt=FALSE)
-# 
-# batch_name <- "FA24-transectB-3"
-# scata_dataset_name <- "FA24-transectB-3"
-# scata_job_id <- "scata6695"
-# run_workflow(batch_name, scata_dataset_name, scata_job_id, prompt=FALSE)
-# 
-# batch_name <- "FA24-transectB-4"
-# scata_dataset_name <- "FA24-transectB-4"
-# scata_job_id <- "scata6696"
-# run_workflow(batch_name, scata_dataset_name, scata_job_id, prompt=FALSE)
-# 
-# batch_name <- "Wisconsin"
-# scata_dataset_name <- "FA24-transectB-4"
-# scata_job_id <- "scata6696"
-# run_workflow(batch_name, scata_dataset_name, scata_job_id, prompt=TRUE)
-# 
+batch_name <- "FA24-transectB-1"
+scata_dataset_name <- "FA24-transectB-1"
+scata_job_id <- "scata6693"
+run_workflow(batch_name, scata_dataset_name, scata_job_id, prompt=FALSE)
+
+batch_name <- "FA24-transectB-2"
+scata_dataset_name <- "FA24-transectB-2"
+scata_job_id <- "scata6694"
+run_workflow(batch_name, scata_dataset_name, scata_job_id, prompt=FALSE)
+
+batch_name <- "FA24-transectB-3"
+scata_dataset_name <- "FA24-transectB-3"
+scata_job_id <- "scata6695"
+run_workflow(batch_name, scata_dataset_name, scata_job_id, prompt=FALSE)
+
+batch_name <- "FA24-transectB-4"
+scata_dataset_name <- "FA24-transectB-4"
+scata_job_id <- "scata6696"
+run_workflow(batch_name, scata_dataset_name, scata_job_id, prompt=FALSE)
+
+batch_name <- "Wisconsin"
+scata_dataset_name <- "FA24-transectB-4"
+scata_job_id <- "scata6696"
+run_workflow(batch_name, scata_dataset_name, scata_job_id, prompt=FALSE)
+
 # batch_name <- "FA24-transectB"
 # scata_dataset_name <- "FA24-transectB"
 # scata_job_id <- "scata9999"
@@ -105,23 +105,29 @@ configuration <- mycopins_merge_config("TransectA",
 mycopins_merge(configuration)
 
 # Split into batches
-# configuration <- mycopins_merge_config("TransectB-12",
-#                                        "FA24-transectB-1",
-#                                        "FA24-transectB-2")
-# mycopins_merge(configuration)
-# 
-# configuration <- mycopins_merge_config("TransectB-34",
-#                                        "FA24-transectB-3",
-#                                        "FA24-transectB-4")
-# mycopins_merge(configuration)
-# 
-# configuration <- mycopins_merge_config("TransectB",
-#                                        "TransectB-12",
-#                                        "TransectB-34")
-# mycopins_merge(configuration)
+configuration <- mycopins_merge_config("TransectB-12",
+                                       "FA24-transectB-1",
+                                       "FA24-transectB-2")
+mycopins_merge(configuration)
+
+configuration <- mycopins_merge_config("TransectB-34",
+                                       "FA24-transectB-3",
+                                       "FA24-transectB-4")
+mycopins_merge(configuration)
+
+configuration <- mycopins_merge_config("TransectB",
+                                       "TransectB-12",
+                                       "TransectB-34")
+mycopins_merge(configuration)
+
+configuration <- mycopins_merge_config("TransectAB",
+                                       "TransectA",
+                                       "TransectB")
+mycopins_merge(configuration)
+
 
 configuration <- mycopins_merge_config("All",
-                                       "TransectA",
+                                       "TransectAB",
                                        "TransectC")
 mycopins_merge(configuration)
 

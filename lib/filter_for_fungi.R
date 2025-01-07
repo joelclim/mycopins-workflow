@@ -1,8 +1,9 @@
 filter_for_fungi <- function(counts_df,
                              organism_df,
                              sep_col_name = "_Splitter_") {
-  fungi_taxon_df <- organism_df[nchar(organism_df$gbif.genus) > 0 &
-                                organism_df$gbif.kingdom == "Fungi",]
+
+  # Fungi-only
+  fungi_taxon_df <- organism_df[organism_df$gbif.kingdom == "Fungi",]
 
   start_col <- which(names(counts_df) == sep_col_name)
 
