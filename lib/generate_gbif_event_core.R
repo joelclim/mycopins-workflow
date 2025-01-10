@@ -34,7 +34,7 @@ create_gbif_event_dynamic_properties <- function(site_letter, organism, env_reco
   return(dynamic_properties_df)
 }
 
-generate_gbif_event <- function(configuration) {
+generate_gbif_event_core <- function(configuration) {
   environment_file <- configuration["mycopins_environment_file"]
 
   location <- configuration["location"]

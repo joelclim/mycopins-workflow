@@ -1,8 +1,9 @@
 lib_directory <- paste0(workflow_directory, "lib/")
 
-source(paste0(lib_directory, "generate_gbif_event.R"))
-source(paste0(lib_directory, "generate_gbif_occurrence.R"))
+source(paste0(lib_directory, "generate_gbif_event_core.R"))
+source(paste0(lib_directory, "generate_gbif_event_occurrence.R"))
 source(paste0(lib_directory, "generate_gbif_dna_derived.R"))
+source(paste0(lib_directory, "generate_gbif_occurrence_core.R"))
 
 #
 # Helper functions
@@ -81,9 +82,10 @@ mycopins_ipt_gbif_config <- function() {
   mycopins_tag_sequence_file <- paste0(ipt_gbif_data_directory, "/mycopins_tag_sequence.csv")
   mycopins_organisms_file <- paste0(ipt_gbif_data_directory, "/mycopins_organisms.csv")
 
-  ipt_gbif_event_file <- paste0(ipt_gbif_output_directory, "/event.txt")
-  ipt_gbif_occurrence_file <- paste0(ipt_gbif_output_directory, "/occurrence.txt")
+  ipt_gbif_event_core_file <- paste0(ipt_gbif_output_directory, "/event.txt")
+  ipt_gbif_event_occurrence_file <- paste0(ipt_gbif_output_directory, "/occurrence.txt")
   ipt_gbif_dna_derived_file <- paste0(ipt_gbif_output_directory, "/dna-derived.txt")
+  ipt_gbif_occurrence_core_file <- paste0(ipt_gbif_output_directory, "/occurrence-core.txt")
 
   #
   # Constant definitions
@@ -116,9 +118,10 @@ mycopins_ipt_gbif_config <- function() {
 
   return(c(
     ipt_gbif_output_directory = ipt_gbif_output_directory,
-    ipt_gbif_event_file = ipt_gbif_event_file,
-    ipt_gbif_occurrence_file = ipt_gbif_occurrence_file,
+    ipt_gbif_event_core_file = ipt_gbif_event_core_file,
+    ipt_gbif_event_occurrence_file = ipt_gbif_event_occurrence_file,
     ipt_gbif_dna_derived_file = ipt_gbif_dna_derived_file,
+    ipt_gbif_occurrence_core_file = ipt_gbif_occurrence_core_file,
     mycopins_environment_file = mycopins_environment_file,
     mycopins_community_file = mycopins_community_file,
     mycopins_tag_sequence_file = mycopins_tag_sequence_file,
@@ -150,27 +153,34 @@ mycopins_ipt_gbif_config <- function() {
 
 
 mycopins_ipt_gbif_generate <- function(configuration) {
-  #
-  # event
-  #
-  gbif_event <- generate_gbif_event(configuration)
-  write.csv(gbif_event, configuration["ipt_gbif_event_file"],
-      row.names = FALSE, na = "", fileEncoding = "UTF-8")
+  # #
+  # # event core
+  # #
+  # gbif_event_core <- generate_gbif_event_core(configuration)
+  # write.csv(gbif_event_core, configuration["ipt_gbif_event_core_file"],
+  #     row.names = FALSE, na = "", fileEncoding = "UTF-8")
+
+
+  # #
+  # # event occurrence (extension)
+  # #
+  # gbif_event_occurrence <- generate_gbif_event_occurrence(configuration)
+  # write.csv(gbif_event_occurrence, configuration["ipt_gbif_event_occurrence_file"],
+  #         row.names = FALSE, na = "", fileEncoding = "UTF-8")
+
+
+  # #
+  # # dna-derived
+  # #
+  # gbif_dna_derived <- generate_dna_derived(configuration)
+  # write.csv(gbif_dna_derived, configuration["ipt_gbif_dna_derived_file"],
+  #         row.names = FALSE, na = "", fileEncoding = "UTF-8")
 
 
   #
-  # occurrence
+  # occurrence core
   #
-  gbif_occurrence <- generate_gbif_occurrence(configuration)
-  write.csv(gbif_occurrence, configuration["ipt_gbif_occurrence_file"],
+  gbif_occurrence_core <- generate_gbif_occurrence_core(configuration)
+  write.csv(gbif_occurrence_core, configuration["ipt_gbif_occurrence_core_file"],
           row.names = FALSE, na = "", fileEncoding = "UTF-8")
-
-
-  #
-  # dna-derived
-  #
-  gbif_dna_derived <- generate_dna_derived(configuration)
-  write.csv(gbif_dna_derived, configuration["ipt_gbif_dna_derived_file"],
-          row.names = FALSE, na = "", fileEncoding = "UTF-8")
-
 }

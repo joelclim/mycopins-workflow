@@ -110,7 +110,7 @@ create_gbif_occurrence_record <- function(eventID, occurrenceID,
 #
 # Main function: generate_gbif_occurrence
 #
-generate_gbif_occurrence <- function(configuration) {
+generate_gbif_event_occurrence <- function(configuration) {
   substrRight <- function(x, n){
     substr(x, nchar(x)-n+1, nchar(x))
   }
