@@ -20,6 +20,7 @@ source(paste0(lib_directory, "apply_match_to_counts.R"))
 
 # For GBIF DNA-derived dataset
 source(paste0(lib_directory, "create_tag_sequence_dataset.R"))
+source(paste0(lib_directory, "create_sample_cluster_dataset.R"))
 
 # Taxonomy and Traits
 source(paste0(lib_directory, "create_organism_dataset.R"))
@@ -91,6 +92,7 @@ mycopins_config <- function(batch_name, scata_dataset_name, scata_job_id) {
   mycopins_environment_file <- paste0(batch_directory, "mycopins_environment.csv")
   mycopins_community_file <- paste0(batch_directory, "mycopins_community.csv")
   mycopins_tag_sequence_file <- paste0(batch_directory, "mycopins_tag_sequence.csv")
+  mycopins_sample_cluster_file <- paste0(batch_directory, "mycopins_sample_cluster.csv")
   mycopins_organisms_file <- paste0(batch_directory, "mycopins_organisms.csv")
   genus_traits_file <- paste0(batch_directory, "mycopins_genus_traits.csv")
 
@@ -125,6 +127,7 @@ mycopins_config <- function(batch_name, scata_dataset_name, scata_job_id) {
     mycopins_environment_file = mycopins_environment_file,
     mycopins_community_file = mycopins_community_file,
     mycopins_tag_sequence_file = mycopins_tag_sequence_file,
+    mycopins_sample_cluster_file = mycopins_sample_cluster_file,
     mycopins_organisms_file = mycopins_organisms_file,
     genus_traits_file = genus_traits_file,
     fungal_traits_file = fungal_traits_file,
@@ -233,6 +236,7 @@ mycopins_annotate <- function(configuration) {
   mycopins_environment_file = configuration["mycopins_environment_file"]
   mycopins_community_file = configuration["mycopins_community_file"]
   mycopins_tag_sequence_file = configuration["mycopins_tag_sequence_file"]
+  mycopins_sample_cluster_file = configuration["mycopins_sample_cluster_file"]
 
   # Apply top match to clusters
   print("[Annotate] Apply top match species to clusters")
@@ -275,6 +279,11 @@ mycopins_annotate <- function(configuration) {
   write.csv(tag_sequence_df, file = mycopins_tag_sequence_file,
             row.names = FALSE, na = "", fileEncoding = "UTF-8")
 
+  # Create sample-cluster dataset
+  print("[Annotate] Create sample-cluster dataset")
+  sample_cluster_df <- create_sample_cluster_dataset(cleaned_counts_df, complete_clusters_df, fungal_traits_df)
+  write.csv(sample_cluster_df, file = mycopins_sample_cluster_file,
+            row.names = FALSE, na = "", fileEncoding = "UTF-8")
 
   print("[Annotate] Complete!")
 }

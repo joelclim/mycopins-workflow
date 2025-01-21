@@ -1,5 +1,7 @@
 if (!require("dplyr")) install.packages("dplyr")
+if (!require("tidyr")) install.packages("tidyr")
 library(dplyr)
+library(tidyr)
 
 create_tag_sequence_dataset <- function(cleaned_counts_df, complete_clusters_df, mycopins_organisms_df) {
   # Reshape data to a long format for scata cluster ids

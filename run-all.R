@@ -71,7 +71,7 @@ run_workflow(batch_name, scata_dataset_name, scata_job_id, prompt=FALSE)
 # scata_dataset_name <- "FA24-transectB"
 # scata_job_id <- "scata9999"
 # run_workflow2(batch_name, scata_dataset_name, scata_job_id, prompt=FALSE)
-# 
+#
 # batch_name <- "FA24-transectB-4w"
 # scata_dataset_name <- "FA24-transectB-4w"
 # scata_job_id <- "scata6709"
