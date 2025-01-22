@@ -1,3 +1,7 @@
+if (!require("dplyr")) install.packages("dplyr")
+if (!require("jsonlite")) install.packages("jsonlite")
+if (!require("readr")) install.packages("readr")
+
 library(dplyr)
 library(readr)
 library(jsonlite)

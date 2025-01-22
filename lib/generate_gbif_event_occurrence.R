@@ -1,3 +1,7 @@
+if (!require("dplyr")) install.packages("dplyr")
+if (!require("jsonlite")) install.packages("jsonlite")
+if (!require("readr")) install.packages("readr")
+
 library(dplyr)
 library(jsonlite)
 library(readr)
@@ -10,15 +14,23 @@ library(readr)
 create_gbif_occurrence_dynamic_properties <- function(site_letter, sample_cluster, organism) {
   dynamic_properties_df <- data.frame(woodType = get_wood_type(site_letter),
                                       woodTexture = get_wood_texture(site_letter))
-  dynamic_properties_df$match <- toJSON(sample_cluster[, c("source", "percent_identity",
-                                 "evalue", "bit_score",
-                                 "accession", "taxid",
-                                 "Count")])
-  fungal_traits_df <- data.frame(
-    primaryLifestyle = organism$fungal_traits.primary_lifestyle,
-    secondaryLifestyle = organism$fungal_traits.secondary_lifestyle
-  )
-  dynamic_properties_df$fungalTraits <- fungal_traits_df
+
+  if (nrow(sample_cluster) > 0) {
+    match_df <- sample_cluster[, c("source", "percent_identity",
+                                  "evalue", "bit_score",
+                                  "accession", "taxid",
+                                  "Count")]
+
+    dynamic_properties_df$match <- toJSON(match_df)
+  }
+
+  if (nrow(organism) > 0) {
+    fungal_traits_df <- data.frame(
+      primaryLifestyle = organism$fungal_traits.primary_lifestyle,
+      secondaryLifestyle = organism$fungal_traits.secondary_lifestyle
+    )
+    dynamic_properties_df$fungalTraits <- fungal_traits_df
+  }
 
   return(dynamic_properties_df)
 }
@@ -252,3 +264,6 @@ generate_gbif_event_occurrence <- function(configuration) {
 # > print(execution_time)
 # user  system elapsed
 # 300.69    5.06  841.31
+
+#    user  system elapsed
+# 5243.58   66.36 5628.10

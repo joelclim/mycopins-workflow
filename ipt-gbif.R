@@ -79,7 +79,6 @@ mycopins_ipt_gbif_config <- function() {
 
   mycopins_environment_file <- paste0(ipt_gbif_data_directory, "/mycopins_environment.csv")
   mycopins_community_file <- paste0(ipt_gbif_data_directory, "/mycopins_community.csv")
-  mycopins_tag_sequence_file <- paste0(ipt_gbif_data_directory, "/mycopins_tag_sequence.csv")
   mycopins_sample_cluster_file <- paste0(ipt_gbif_data_directory, "/mycopins_sample_cluster.csv")
   mycopins_organisms_file <- paste0(ipt_gbif_data_directory, "/mycopins_organisms.csv")
 
@@ -125,7 +124,6 @@ mycopins_ipt_gbif_config <- function() {
     ipt_gbif_occurrence_core_file = ipt_gbif_occurrence_core_file,
     mycopins_environment_file = mycopins_environment_file,
     mycopins_community_file = mycopins_community_file,
-    mycopins_tag_sequence_file = mycopins_tag_sequence_file,
     mycopins_sample_cluster_file = mycopins_sample_cluster_file,
     mycopins_organisms_file = mycopins_organisms_file,
     # Shared constants

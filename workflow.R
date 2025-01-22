@@ -19,7 +19,6 @@ source(paste0(lib_directory, "get_weather_data.R"))
 source(paste0(lib_directory, "apply_match_to_counts.R"))
 
 # For GBIF DNA-derived dataset
-source(paste0(lib_directory, "create_tag_sequence_dataset.R"))
 source(paste0(lib_directory, "create_sample_cluster_dataset.R"))
 
 # Taxonomy and Traits
@@ -91,7 +90,6 @@ mycopins_config <- function(batch_name, scata_dataset_name, scata_job_id) {
   complete_counts_file <- paste0(batch_directory, "complete_counts.csv")
   mycopins_environment_file <- paste0(batch_directory, "mycopins_environment.csv")
   mycopins_community_file <- paste0(batch_directory, "mycopins_community.csv")
-  mycopins_tag_sequence_file <- paste0(batch_directory, "mycopins_tag_sequence.csv")
   mycopins_sample_cluster_file <- paste0(batch_directory, "mycopins_sample_cluster.csv")
   mycopins_organisms_file <- paste0(batch_directory, "mycopins_organisms.csv")
   genus_traits_file <- paste0(batch_directory, "mycopins_genus_traits.csv")
@@ -126,7 +124,6 @@ mycopins_config <- function(batch_name, scata_dataset_name, scata_job_id) {
     complete_counts_file = complete_counts_file,
     mycopins_environment_file = mycopins_environment_file,
     mycopins_community_file = mycopins_community_file,
-    mycopins_tag_sequence_file = mycopins_tag_sequence_file,
     mycopins_sample_cluster_file = mycopins_sample_cluster_file,
     mycopins_organisms_file = mycopins_organisms_file,
     genus_traits_file = genus_traits_file,
@@ -235,7 +232,6 @@ mycopins_annotate <- function(configuration) {
   complete_counts_file = configuration["complete_counts_file"]
   mycopins_environment_file = configuration["mycopins_environment_file"]
   mycopins_community_file = configuration["mycopins_community_file"]
-  mycopins_tag_sequence_file = configuration["mycopins_tag_sequence_file"]
   mycopins_sample_cluster_file = configuration["mycopins_sample_cluster_file"]
 
   # Apply top match to clusters
@@ -272,12 +268,6 @@ mycopins_annotate <- function(configuration) {
   mycopins_organisms_df <- create_organism_dataset(organisms, complete_clusters_df, fungal_traits_df)
   write.csv(mycopins_organisms_df, file = mycopins_organisms_file,
             row.names = FALSE, fileEncoding = "UTF-8")
-
-  # Create tag-sequence dataset
-  print("[Annotate] Create tag-sequence dataset")
-  tag_sequence_df <- create_tag_sequence_dataset(cleaned_counts_df, complete_clusters_df, mycopins_organisms_df)
-  write.csv(tag_sequence_df, file = mycopins_tag_sequence_file,
-            row.names = FALSE, na = "", fileEncoding = "UTF-8")
 
   # Create sample-cluster dataset
   print("[Annotate] Create sample-cluster dataset")
