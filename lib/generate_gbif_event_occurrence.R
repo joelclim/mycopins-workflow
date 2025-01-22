@@ -7,19 +7,13 @@ library(readr)
 #          get_wood_type(site_letter), get_wood_texture(site_letter), get_match_source(source)
 #
 
-create_gbif_occurrence_dynamic_properties <- function(site_letter, organism) {
+create_gbif_occurrence_dynamic_properties <- function(site_letter, sample_cluster, organism) {
   dynamic_properties_df <- data.frame(woodType = get_wood_type(site_letter),
                                       woodTexture = get_wood_texture(site_letter))
-  match_df <- data.frame(
-    source = get_match_source(organism$match.source),
-    percentIdentity = organism$match.percent_identity,
-    evalue = organism$match.evalue,
-    bitScore = organism$match.bit_score,
-    accession = organism$match.accession,
-    taxId = organism$match.tax_id
-  )
-  dynamic_properties_df$match <- match_df
-
+  dynamic_properties_df$match <- toJSON(sample_cluster[, c("source", "percent_identity",
+                                 "evalue", "bit_score",
+                                 "accession", "taxid",
+                                 "Count")])
   fungal_traits_df <- data.frame(
     primaryLifestyle = organism$fungal_traits.primary_lifestyle,
     secondaryLifestyle = organism$fungal_traits.secondary_lifestyle
@@ -31,13 +25,13 @@ create_gbif_occurrence_dynamic_properties <- function(site_letter, organism) {
 
 create_gbif_occurrence_record <- function(eventID, occurrenceID,
                                     basisOfRecord, organismQuantityType, sampleSizeUnit,
-                                    site_letter, specie, organism, occurrence_match) {
+                                    site_letter, specie, sample_cluster, organism, occurrence_match) {
   get_data_generalizations <- function(organism) {
-    if (organism$match.source == "BLAST") {
+    if (organism$source == "BLAST") {
       return(paste0("Identified via BLASTn circa 2024-05-01 with ",
-                  organism$match.bit_score, " bit score, ",
-                  organism$match.evalue, " evalue, and ",
-                  format(round(organism$match.percent_identity, 2), nsmall = 2), "% identity."))
+                  organism$bit_score, " bit score, ",
+                  organism$evalue, " evalue, and ",
+                  format(round(organism$percent_identity, 2), nsmall = 2), "% identity."))
     }
     return("Identified via UNITE Fungi 9.0 (2023-07-18).")
   }
@@ -47,17 +41,16 @@ create_gbif_occurrence_record <- function(eventID, occurrenceID,
   }
 
   get_taxon_concept_id <- function(organism) {
-    if (organism$match.source == "BLAST") {
-      return(paste0("NCBI:tx", organism$match.tax_id))
+    if (organism$source == "BLAST") {
+      return(paste0("NCBI:tx", organism$taxid))
     }
 
     # UNITE
-    tax_id <- strsplit(organism$match.tax_id, split="\\|")
+    tax_id <- strsplit(organism$taxid, split="\\|")
     sh_id <- tax_id[[1]][1]
     seq_dataset <- tax_id[[1]][2]
     return(paste0("UNITE:", sh_id))
   }
-
 
   taxonID <- get_taxon_id(organism)
   taxonConceptID <- get_taxon_concept_id(organism)
@@ -73,7 +66,7 @@ create_gbif_occurrence_record <- function(eventID, occurrenceID,
     occurrenceStatus <- "present"
   }
 
-  dynamic_properties_df <- create_gbif_occurrence_dynamic_properties(site_letter, organism)
+  dynamic_properties_df <- create_gbif_occurrence_dynamic_properties(site_letter, sample_cluster, organism)
 
   preparations <- paste("DNA extract from a", get_wood_type(site_letter), "MycoPin.")
 
@@ -135,6 +128,10 @@ generate_gbif_event_occurrence <- function(configuration) {
   mycopins.organisms <- read_csv(organisms_file, show_col_types = FALSE,
                                 locale = locale(encoding = "UTF-8"))
 
+  sample_cluster_file <- configuration["mycopins_sample_cluster_file"]
+  mycopins.sample_cluster <- read_csv(sample_cluster_file, show_col_types = FALSE,
+                                locale = locale(encoding = "UTF-8"))
+
   gbif_occurrences <- data.frame(
     occurrenceID = character(),
     eventID = character(),
@@ -178,50 +175,69 @@ generate_gbif_event_occurrence <- function(configuration) {
         eventDate <- collection_dates[j]
         date_id <- format(eventDate, "%Y_%b_%d")
 
-        sites <- mycopins.environment %>%
+        samples <- mycopins.environment %>%
           filter(as.Date(Date.Collected, "%m/%d/%Y") == eventDate
                 & Transect == transect) %>%
           arrange(Sample.Number) %>%
           pull(Sample.Number)
 
-        site_count <- length(sites)
-        for (k in 1:site_count) {
-          site <- sites[k]
-          eventID <- paste0(transect, "_", site)
+        # site = sample
+        sample_count <- length(samples)
+        for (k in 1:sample_count) {
+          sample <- samples[k]
+          eventID <- paste0(transect, "_", sample)
 
-          site_letter <- substr(site, nchar(site), nchar(site))
+          # For wood type and wood texture classification
+          site_letter <- substr(sample, nchar(sample), nchar(sample))
 
           species_count <- length(species)
           for (m in 1:species_count) {
             specie <- species[m]
 
+            if (specie %in% c('Fungi', 'Fungus', 'mock')) {
+              next
+            }
+
             print(paste0("Transect(", i, "/", transect_count,
                         "); Date.Collected(", j, "/", collection_date_count,
-                        "); Site(", k, "/", site_count,
+                        "); Sample(", k, "/", sample_count,
                         "); Species(", m, "/", species_count, ")"))
 
-            organism <- mycopins.organisms %>%
-              filter(organism == specie & gbif.kingdom == 'Fungi') %>%
-              dplyr::slice(1)
 
-            if (nrow(organism) == 1) { # exists
-              occurrenceID <- paste0(eventID, ":", organism$gbif.usage_key)
+            sample_cluster <- mycopins.sample_cluster %>%
+              filter(Transect == transect &
+                     Sample.Number == sample &
+                     gbif_accepted_name == specie & gbif.kingdom == 'Fungi') %>%
+              arrange(-Count)
 
-              occurrence_match <- mycopins %>%
-                filter(Transect == transect
-                      & as.Date(Date.Collected, "%m/%d/%Y") == eventDate
-                      & substrRight(Sample.Number, 1) == site_letter) %>%
-                dplyr::slice(1)
-
-              occurrence_record <- create_gbif_occurrence_record(eventID, occurrenceID,
-                                                            basisOfRecord, organismQuantityType, sampleSizeUnit,
-                                                            site_letter, specie,
-                                                            organism, occurrence_match)
-              gbif_occurrences <- rbind(gbif_occurrences,
-                                        as.data.frame(occurrence_record, stringsAsFactors = FALSE))
+            organism <- NULL
+            if (nrow(sample_cluster) == 0) {
+              # absent: first instance of the specie regardless of the transect
+              organism <- mycopins.sample_cluster %>%
+                            filter(gbif_accepted_name == specie & gbif.kingdom == 'Fungi') %>%
+                            dplyr::slice(1)
             } else {
-              # Do nothing.
+              # present: The most count of the selected sample_cluster records
+              organism <- sample_cluster[1, ]
             }
+
+            # absent, gbif.kingdom != 'Fungi'
+            if (nrow(organism) != 1) {
+              next
+            }
+
+            occurrenceID <- paste0(eventID, ":", organism$gbif.usage_key)
+            occurrence_match <- mycopins %>%
+              filter(Transect == transect
+                    & Sample.Number == sample
+                    & as.Date(Date.Collected, "%m/%d/%Y") == eventDate)
+
+            occurrence_record <- create_gbif_occurrence_record(eventID, occurrenceID,
+                                                          basisOfRecord, organismQuantityType, sampleSizeUnit,
+                                                          site_letter, specie, sample_cluster,
+                                                          organism, occurrence_match)
+            gbif_occurrences <- rbind(gbif_occurrences,
+                                      as.data.frame(occurrence_record, stringsAsFactors = FALSE))
           }
         }
       }
