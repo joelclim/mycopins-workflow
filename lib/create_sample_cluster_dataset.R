@@ -1,8 +1,8 @@
-if (!require("dplyr")) install.packages("dplyr")
 if (!require("rgbif")) install.packages("rgbif")
+if (!require("tidyr")) install.packages("tidyr")
 
-library("dplyr")
 library("rgbif")
+library("tidyr")
 
 get_gbif_taxonomy_by_accepted_name <- function(gbif_accepted_name) {
   response <- name_backbone_verbose(name=gbif_accepted_name, kingdom="fungi")

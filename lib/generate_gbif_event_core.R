@@ -126,7 +126,7 @@ generate_gbif_event_core <- function(configuration) {
             municipality = municipality,
             decimalLatitude = decimalLatitude,
             decimalLongitude = decimalLongitude,
-            dynamicProperties = gsub("\\[|\\]", "", toJSON(dynamic_properties_df))
+            dynamicProperties = toJSON(dynamic_properties_df)
           )
           gbif_events <- rbind(gbif_events, as.data.frame(row, stringsAsFactors = FALSE))
         }

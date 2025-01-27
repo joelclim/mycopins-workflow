@@ -103,7 +103,6 @@ mycopins_ipt_gbif_config <- function() {
   # Occurrence
   basisOfRecord <- "MaterialSample"
   organismQuantityType <- "DNA sequence reads"
-  sampleSizeUnit <- "DNA sequence reads"
 
   # DNA-derived
   # https://rs.gbif.org/extension/gbif/1.0/dna_derived_data_2024-04-17.xml#DNA_sequence
@@ -138,7 +137,6 @@ mycopins_ipt_gbif_config <- function() {
     # Occurrence
     basisOfRecord = basisOfRecord,
     organismQuantityType = organismQuantityType,
-    sampleSizeUnit = sampleSizeUnit,
     # DNA-derived data
     libLayout = libLayout,
     targetGene = targetGene,
@@ -177,9 +175,9 @@ mycopins_ipt_gbif_generate <- function(configuration) {
           row.names = FALSE, na = "", fileEncoding = "UTF-8")
 
 
-  #
-  # occurrence core
-  #
+
+  occurrence core
+
   gbif_occurrence_core <- generate_gbif_occurrence_core(configuration)
   write.csv(gbif_occurrence_core, configuration["ipt_gbif_occurrence_core_file"],
           row.names = FALSE, na = "", fileEncoding = "UTF-8")

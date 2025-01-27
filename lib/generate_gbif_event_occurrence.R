@@ -21,10 +21,11 @@ create_gbif_occurrence_dynamic_properties <- function(site_letter, sample_cluste
                                   "accession", "taxid",
                                   "Count")]
 
-    dynamic_properties_df$match <- toJSON(match_df)
+    dynamic_properties_df$match <- list(match_df)
   }
 
-  if (nrow(organism) > 0) {
+  if (nrow(organism) > 0 &
+    'fungal_traits.primary_lifestyle'%in% colnames(organism)) {
     fungal_traits_df <- data.frame(
       primaryLifestyle = organism$fungal_traits.primary_lifestyle,
       secondaryLifestyle = organism$fungal_traits.secondary_lifestyle
@@ -36,7 +37,7 @@ create_gbif_occurrence_dynamic_properties <- function(site_letter, sample_cluste
 }
 
 create_gbif_occurrence_record <- function(eventID, occurrenceID,
-                                    basisOfRecord, organismQuantityType, sampleSizeUnit,
+                                    basisOfRecord, organismQuantityType,
                                     site_letter, specie, sample_cluster, organism, occurrence_match) {
   get_data_generalizations <- function(organism) {
     if (organism$source == "BLAST") {
@@ -93,7 +94,6 @@ create_gbif_occurrence_record <- function(eventID, occurrenceID,
     organismQuantityType = organismQuantityType,
     occurrenceStatus = occurrenceStatus,
     preparations = preparations,
-    sampleSizeUnit = sampleSizeUnit,
     scientificName = organism$gbif.scientific_name,
     acceptedNameUsage = organism$gbif.accepted_name_usage,
     originalNameUsage = organism$gbif.original_name_usage,
@@ -106,7 +106,8 @@ create_gbif_occurrence_record <- function(eventID, occurrenceID,
     taxonRank = organism$gbif.taxon_rank,
     scientificNameAuthorship = organism$gbif.scientific_name_authorship,
     taxonomicStatus = organism$gbif.status,
-    dynamicProperties = gsub("\\[|\\]", "", toJSON(dynamic_properties_df))
+    #dynamicProperties = gsub("\\[|\\]", "", toJSON(dynamic_properties_df))
+    dynamicProperties = toJSON(dynamic_properties_df)
   )
 
   return(occurrence_record)
@@ -123,7 +124,6 @@ generate_gbif_event_occurrence <- function(configuration) {
   location <- configuration["location"]
   basisOfRecord <- configuration["basisOfRecord"]
   organismQuantityType <- configuration["organismQuantityType"]
-  sampleSizeUnit <- configuration["sampleSizeUnit"]
 
   transects <- get_transects()
 
@@ -155,7 +155,6 @@ generate_gbif_event_occurrence <- function(configuration) {
     organismQuantityType = character(),
     occurrenceStatus = character(),
     preparations = character(),
-    sampleSizeUnit = character(),
     scientificName = character(),
     acceptedNameUsage = character(),
     originalNameUsage = character(),
@@ -245,7 +244,7 @@ generate_gbif_event_occurrence <- function(configuration) {
                     & as.Date(Date.Collected, "%m/%d/%Y") == eventDate)
 
             occurrence_record <- create_gbif_occurrence_record(eventID, occurrenceID,
-                                                          basisOfRecord, organismQuantityType, sampleSizeUnit,
+                                                          basisOfRecord, organismQuantityType,
                                                           site_letter, specie, sample_cluster,
                                                           organism, occurrence_match)
             gbif_occurrences <- rbind(gbif_occurrences,
