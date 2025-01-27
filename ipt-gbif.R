@@ -175,9 +175,9 @@ mycopins_ipt_gbif_generate <- function(configuration) {
           row.names = FALSE, na = "", fileEncoding = "UTF-8")
 
 
-
-  occurrence core
-
+  #
+  # occurrence core
+  #
   gbif_occurrence_core <- generate_gbif_occurrence_core(configuration)
   write.csv(gbif_occurrence_core, configuration["ipt_gbif_occurrence_core_file"],
           row.names = FALSE, na = "", fileEncoding = "UTF-8")

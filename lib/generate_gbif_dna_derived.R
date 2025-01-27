@@ -1,8 +1,8 @@
-if (!require("dplyr")) install.packages("dplyr")
 if (!require("readr")) install.packages("readr")
+if (!require("tidyr")) install.packages("tidyr")
 
-library(dplyr)
 library(readr)
+library(tidyr)
 
 #
 # Main function: generate_dna_derived
