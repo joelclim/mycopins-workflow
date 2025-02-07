@@ -67,7 +67,7 @@ get_match_source <- function(source) {
   if (source == "BLAST") {
     return("BLASTn circa 2024-05-01")
   }
-  return("UNITE Fungi 9.0 (2023-07-18)")
+  return("UNITE Fungi 9.0 (2023-07-18) (https://doi.org/10.15156/BIO/2938068)")
 }
 
 #
@@ -110,7 +110,7 @@ mycopins_ipt_gbif_config <- function() {
   targetGene <- "ITS"
   targetSubfragment <- "ITS2"
   seqMethod <- "Illumina MiSeq"
-  otuDB <- "Clustering based on the UNITE Fungi 9.0 (2023-07-18) using USearch with 90% identity parameter (SCATA)"
+  otuDB <- "Clustering based on the UNITE Fungi 9.0 (2023-07-18) (https://doi.org/10.15156/BIO/2938068) using USearch with 90% identity parameter (SCATA)"
   pcrPrimerNameFormward <- "fITS7"
   pcrPrimerNameReverse <- "ITS4"
   pcrPrimerReference <- "https://doi.org/10.1007/978-1-4939-3369-3_4"

@@ -46,7 +46,7 @@ create_gbif_occurrence_record <- function(eventID, occurrenceID,
                   organism$evalue, " evalue, and ",
                   format(round(organism$percent_identity, 2), nsmall = 2), "% identity."))
     }
-    return("Identified via UNITE Fungi 9.0 (2023-07-18).")
+    return("Identified via UNITE Fungi 9.0 (2023-07-18) (https://doi.org/10.15156/BIO/2938068)")
   }
 
   get_taxon_id <- function(organism) {
