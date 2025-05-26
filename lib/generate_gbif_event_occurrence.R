@@ -106,7 +106,6 @@ create_gbif_occurrence_record <- function(eventID, occurrenceID,
     taxonRank = organism$gbif.taxon_rank,
     scientificNameAuthorship = organism$gbif.scientific_name_authorship,
     taxonomicStatus = organism$gbif.status,
-    #dynamicProperties = gsub("\\[|\\]", "", toJSON(dynamic_properties_df))
     dynamicProperties = toJSON(dynamic_properties_df)
   )
 
@@ -205,9 +204,12 @@ generate_gbif_event_occurrence <- function(configuration) {
           for (m in 1:species_count) {
             specie <- species[m]
 
-            if (specie %in% c('Fungi', 'Fungus', 'mock')) {
+            if (specie %in% c('mock')) {
               next
             }
+            # if (specie %in% c('Fungi', 'Fungus', 'mock')) {
+            #   next
+            # }
 
             print(paste0("Transect(", i, "/", transect_count,
                         "); Date.Collected(", j, "/", collection_date_count,
@@ -258,6 +260,16 @@ generate_gbif_event_occurrence <- function(configuration) {
   print(execution_time)
 
   return(gbif_occurrences)
+}
+
+
+generate_gbif_event_occurrence_no_kingdom <- function(configuration) {
+  ipt_gbif_event_occurrence_all_fungi_file <- configuration["ipt_gbif_event_occurrence_all_fungi_file"]
+  gbif.event_occurrence <- read_csv(ipt_gbif_event_occurrence_all_fungi_file, show_col_types = FALSE,
+                                  locale = locale(encoding = "UTF-8"))
+
+
+
 }
 
 # > print(execution_time)

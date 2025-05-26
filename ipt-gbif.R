@@ -83,6 +83,7 @@ mycopins_ipt_gbif_config <- function() {
   mycopins_organisms_file <- paste0(ipt_gbif_data_directory, "/mycopins_organisms.csv")
 
   ipt_gbif_event_core_file <- paste0(ipt_gbif_output_directory, "/event.txt")
+  ipt_gbif_event_occurrence_all_fungi_file <- paste0(ipt_gbif_output_directory, "/occurrence-all-fungi.txt")
   ipt_gbif_event_occurrence_file <- paste0(ipt_gbif_output_directory, "/occurrence.txt")
   ipt_gbif_dna_derived_file <- paste0(ipt_gbif_output_directory, "/dna-derived.txt")
   ipt_gbif_occurrence_core_file <- paste0(ipt_gbif_output_directory, "/occurrence-core.txt")
@@ -118,6 +119,7 @@ mycopins_ipt_gbif_config <- function() {
   return(c(
     ipt_gbif_output_directory = ipt_gbif_output_directory,
     ipt_gbif_event_core_file = ipt_gbif_event_core_file,
+    ipt_gbif_event_occurrence_all_fungi_file = ipt_gbif_event_occurrence_all_fungi_file,
     ipt_gbif_event_occurrence_file = ipt_gbif_event_occurrence_file,
     ipt_gbif_dna_derived_file = ipt_gbif_dna_derived_file,
     ipt_gbif_occurrence_core_file = ipt_gbif_occurrence_core_file,
@@ -154,31 +156,34 @@ mycopins_ipt_gbif_generate <- function(configuration) {
   #
   # event core
   #
-  gbif_event_core <- generate_gbif_event_core(configuration)
-  write.csv(gbif_event_core, configuration["ipt_gbif_event_core_file"],
-      row.names = FALSE, na = "", fileEncoding = "UTF-8")
+  # gbif_event_core <- generate_gbif_event_core(configuration)
+  # write.csv(gbif_event_core, configuration["ipt_gbif_event_core_file"],
+  #     row.names = FALSE, na = "", fileEncoding = "UTF-8")
 
 
   #
   # event occurrence (extension)
   #
   gbif_event_occurrence <- generate_gbif_event_occurrence(configuration)
-  write.csv(gbif_event_occurrence, configuration["ipt_gbif_event_occurrence_file"],
+  write.csv(gbif_event_occurrence, configuration["ipt_gbif_event_occurrence_all_fungi_file"],
           row.names = FALSE, na = "", fileEncoding = "UTF-8")
 
+  gbif_event_occurrence_no_kingdom <- generate_gbif_event_occurrence_no_kingdom(configuration)
+  write.csv(gbif_event_occurrence_no_kingdom, configuration["ipt_gbif_event_occurrence_file"],
+          row.names = FALSE, na = "", fileEncoding = "UTF-8")
 
   #
   # dna-derived
   #
-  gbif_dna_derived <- generate_dna_derived(configuration)
-  write.csv(gbif_dna_derived, configuration["ipt_gbif_dna_derived_file"],
-          row.names = FALSE, na = "", fileEncoding = "UTF-8")
+  # gbif_dna_derived <- generate_dna_derived(configuration)
+  # write.csv(gbif_dna_derived, configuration["ipt_gbif_dna_derived_file"],
+  #         row.names = FALSE, na = "", fileEncoding = "UTF-8")
 
 
   #
   # occurrence core
   #
-  gbif_occurrence_core <- generate_gbif_occurrence_core(configuration)
-  write.csv(gbif_occurrence_core, configuration["ipt_gbif_occurrence_core_file"],
-          row.names = FALSE, na = "", fileEncoding = "UTF-8")
+  # gbif_occurrence_core <- generate_gbif_occurrence_core(configuration)
+  # write.csv(gbif_occurrence_core, configuration["ipt_gbif_occurrence_core_file"],
+  #         row.names = FALSE, na = "", fileEncoding = "UTF-8")
 }
