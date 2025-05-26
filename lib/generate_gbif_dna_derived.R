@@ -40,6 +40,7 @@ generate_dna_derived <- function(configuration) {
     filter(
       (gbif_accepted_name %in% species) &
       !(gbif_accepted_name %in% c('Fungi', 'Fungus', 'mock')) &
+      !(gbif.kingdom %in% c('Plantae')) &
       !is.na(DNA_sequence)
     ) %>%
     mutate(
